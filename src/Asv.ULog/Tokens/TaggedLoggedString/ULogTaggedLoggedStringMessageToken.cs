@@ -1,3 +1,5 @@
+using Asv.IO;
+
 namespace Asv.ULog;
 
 public class ULogTaggedLoggedStringMessageToken : IULogToken
