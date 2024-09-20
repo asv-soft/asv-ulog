@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <LangVersion>latest</LangVersion>
@@ -9,7 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Asv.IO" Version="3.0.0-dev.2" />
+      <PackageReference Include="Asv.IO" Version="3.0.0-dev.3" />
+      <PackageReference Include="ConsoleAppFramework" Version="5.2.4">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using ZLogger;
 using Exception = System.Exception;
 
 namespace Asv.ULog;
