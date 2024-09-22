@@ -1,5 +1,4 @@
 using System.Buffers;
-using Asv.IO;
 using Spectre.Console;
 
 namespace Asv.ULog.Shell;
@@ -19,10 +18,15 @@ public class UlogFileReader
             stat[token.TokenType] += 1;
             index++;
         } 
-        AnsiConsole.WriteLine($"Read {index} tokens");
+        AnsiConsole.Markup($"[green]Total tokens read:[/] [bold red]{index}[/]\n");
+        var table = new Table();
+        table.AddColumn("Tokens");
+        table.AddColumn(new TableColumn("Count").Centered());
+        table.Border(TableBorder.Double);
         foreach (var (key, value) in stat)
         {
-            AnsiConsole.WriteLine($"{key} : {value}");
+            table.AddRow(new Markup($"[blue]{key}[/]"), new Markup($"[green]{value}[/]"));
         }
+        AnsiConsole.Write(table);
     }
 }

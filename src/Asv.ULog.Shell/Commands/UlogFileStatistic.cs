@@ -25,6 +25,5 @@ public class UlogFileStatistic : Command<UlogFileStatistic.Settings>
         new UlogFileReader().ReadULogFile(settings.FilePath);
         SettingsDumper.Dump(settings);
         return 0;
-        
     }  
 }

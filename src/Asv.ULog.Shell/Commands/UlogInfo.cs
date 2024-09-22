@@ -22,8 +22,7 @@ public sealed class UlogInfo : Command<UlogInfo.Settings>
             AnsiConsole.Markup("[red]Error: File not found![/]");
             return -1;
         }
-        new UlogFileReader().ReadULogFile(settings.FilePath);
-        SettingsDumper.Dump(settings);
+        //TODO: Functional method
         return 0;
         
     }
