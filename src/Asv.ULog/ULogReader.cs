@@ -62,20 +62,22 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 Debug.Assert(token != null);
                 if (token.TokenType != ULogToken.FlagBits)
                 {
-                    _state = ReaderState.Corrupted;
                     // (https://docs.px4.io/main/en/dev_log/ulog_file_format.html#d-logged-data-message)
                     throw new ULogException(
                         $"{ULogToken.FlagBits:G} must be right after {ReaderState.HeaderSection:G}, but got {token.TokenType:G}");
                 }
 
-                _state = ReaderState.DataSection;
+                _state = ReaderState.DefinitionSection;
                 break;
             case ReaderState.DefinitionSection:
                 // definition section doesn't have Token Synchronization message
                 if (!InternalReadToken(ref rdr, ref token)) return false;
                 Debug.Assert(token != null);
                 // if we read all definition tokens, then we can switch to data section
-                if (token.TokenSection.HasFlag(TokenPlaceFlags.Data)) _state = ReaderState.DataSection;
+                if (token.TokenSection.HasFlag(TokenPlaceFlags.Data) && !token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+                {
+                    _state = ReaderState.DataSection;
+                }
                 break;
             case ReaderState.DataSection:
                 // data section can have Token Synchronization message
@@ -83,6 +85,11 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 try
                 {
                     if (!InternalReadToken(ref rdr, ref token)) return false;
+                    Debug.Assert(token is not null);
+                    if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
+                    {
+                        throw new WrongTokenSectionException();
+                    }
                 }
                 catch (ULogException e)
                 {
