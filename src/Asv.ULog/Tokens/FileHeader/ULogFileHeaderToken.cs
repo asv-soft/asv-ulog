@@ -91,8 +91,8 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
                 throw new ULogException(
                     $"Error to parse ULog header: FileMagic[{i}] want{FileMagic[i]}. Got {buffer[i]}");
         buffer = buffer[FileMagic.Length..];
-        BinSerialize.ReadByte(ref buffer, ref _version);
-        BinSerialize.ReadULong(ref buffer, ref _timestamp);
+        _version = BinSerialize.ReadByte(ref buffer);
+        _timestamp = BinSerialize.ReadULong(ref buffer);
     }
 
     public void Serialize(ref Span<byte> buffer)
