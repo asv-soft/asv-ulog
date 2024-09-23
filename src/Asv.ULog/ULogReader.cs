@@ -83,13 +83,12 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 // if token we couldn't read token (exception occured), then it's corrupted data and we need to find sync message
                 try
                 {
+                    if (!InternalReadToken(ref rdr, ref token)) return false;
                     Debug.Assert(token is not null);
                     if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
                     {
                         throw new WrongTokenSectionException();
                     }
-                    
-                    if (!InternalReadToken(ref rdr, ref token)) return false;
                 }
                 catch (ULogException e)
                 {
