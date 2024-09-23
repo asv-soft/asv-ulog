@@ -1,7 +1,7 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace Demo.Utilities;
+namespace Asv.ULog.Shell;
 
 public static class SettingsDumper
 {

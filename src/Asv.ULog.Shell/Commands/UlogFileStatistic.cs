@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Demo.Utilities;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -10,7 +9,7 @@ public class UlogFileStatistic : Command<UlogFileStatistic.Settings>
 {
     public sealed class Settings : CommandSettings
     {
-        [CommandArgument(0, "<FILE>")]
+        [CommandArgument(0, "<[File path]>")]
         [Description("Path to the ULog file.")]
         public string FilePath { get; set; }
     }

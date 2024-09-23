@@ -12,6 +12,10 @@ public class Program
         {
             config.SetApplicationName("ulog");
 
+            config.AddCommand<UlogFileStatistic>("ulog_statistic")
+                .WithDescription("Show statistics about the ULog file")
+                .WithExample("ulog_statistic", "file.ulg");
+
             config.AddCommand<UlogInfo>("ulog_info")
                 .WithDescription("Show information about the ULog file")
                 .WithExample("ulog_info", "file.ulg");
@@ -23,10 +27,6 @@ public class Program
             config.AddCommand<UlogParams>("ulog_params")
                 .WithDescription("Extract parameters from a ULog file")
                 .WithExample("ulog_params", "file.ulg");
-
-            config.AddCommand<UlogFileStatistic>("ulog_statistic")
-                .WithDescription("Show statistics about the ULog file")
-                .WithExample("ulog_statistic", "file.ulg");
         });
 
         return app.Run(args);
