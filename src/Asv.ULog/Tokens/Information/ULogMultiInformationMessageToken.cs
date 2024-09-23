@@ -38,7 +38,7 @@ public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase
 
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
-        BinSerialize.ReadByte(ref buffer, ref _isContinued);
+        _isContinued = BinSerialize.ReadByte(ref buffer);
         base.Deserialize(ref buffer);
     }
 
