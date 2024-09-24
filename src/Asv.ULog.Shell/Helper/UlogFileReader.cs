@@ -136,6 +136,25 @@ public class UlogFileReader
             }
         }
     }
+    public void ReadSubscriptionsMessages(string filePath)
+    {
+        var rdr = CreateSequenceReader(filePath);
+        var reader = ULog.CreateReader();
+        var table = new Table();
+        table.AddColumns("[blue]Name[/] ([yellow]multi id[/], [yellow]message size in bytes[/])", "[green]Value[/]");
+        table.Border(TableBorder.Double);
+        while (reader.TryRead(ref rdr, out var token))
+        {
+            if (token.TokenType == ULogToken.Subscription)
+            {
+                if (token is ULogSubscriptionMessageToken msg)
+                {
+                    table.AddRow(new Markup($"[blue]{msg.MessageName}[/] ([yellow]{msg.MultiId}[/], [yellow]{msg.GetByteSize()}[/])"), new Markup($"{msg.MessageId}"));
+                }
+            }
+        }
+        AnsiConsole.Write(table);
+    }
     
     private SequenceReader<byte> CreateSequenceReader(string filePath)
     {
