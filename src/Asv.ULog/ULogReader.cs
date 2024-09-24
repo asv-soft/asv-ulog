@@ -97,6 +97,8 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                     {
                         throw new WrongTokenSectionException();
                     }
+                    
+                    if (!InternalReadToken(ref rdr, ref token)) return false;
                 }
                 catch (ULogException)
                 {
