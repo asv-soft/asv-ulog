@@ -45,6 +45,25 @@ public class ULogFileService : ULogFileModel
         return new KeyValuePair<string, string>(information.Key.Name,
             ValueToString(information.Key.Type.BaseType, information.Value));
     }
+
+    private KeyValuePair<string, ICollection<string>> GetMultiInformationDictionary(
+        ULogMultiInformationMessageToken information)
+    {
+        var collection = new List<string>();
+        collection.Add(ValueToString(information.Key.Type.BaseType, information.Value));
+        if (information.IsContinued != 1)
+        {
+            return new KeyValuePair<string, ICollection<string>>(information.Key.Name, collection);
+        }
+        var references = Definition.MultiInformation.First(_ => _.Key.Equals(information.Key.Name));
+        Definition.MultiInformation.Remove(references);
+            foreach (var refer in references.Value)
+            {
+                collection.Add($"{refer}");
+            }
+        return new KeyValuePair<string, ICollection<string>>(information.Key.Name, collection);
+    }
+
     public string GetParameter(ULogParameterMessageToken param)
     {
         var result = new StringBuilder();
@@ -52,6 +71,7 @@ public class ULogFileService : ULogFileModel
         var value = ValueToString(param.Key.Type.BaseType, param.Value);
         return result.Append($"{param.Key.Name} = {value}").ToString();
     }
+
     private string ValueToString(ULogType type, byte[] value)
     {
         switch (type)
@@ -80,6 +100,7 @@ public class ULogFileService : ULogFileModel
         Definition = new();
         Definition.Format = new Collection<IDictionary<string, ULogType>>();
         Definition.Information = new Dictionary<string, string>();
+        Definition.MultiInformation = new Dictionary<string, ICollection<string>>();
         Data = new List<IULogToken>();
         DefinitionAndData = new List<IULogToken>();
         Unknown = new List<IULogToken>();
@@ -104,15 +125,24 @@ public class ULogFileService : ULogFileModel
                         case ULogToken.Information:
                             Definition.Information.Add(GetInformationDictionary((ULogInformationMessageToken)token));
                             break;
+                        case ULogToken.MultiInformation:
+                            Definition.MultiInformation.Add(
+                                GetMultiInformationDictionary((ULogMultiInformationMessageToken)token));
+                            break;
                     }
                     break;
                 case (TokenPlaceFlags.DefinitionAndData):
                     switch (token.TokenType)
                     {
                         case ULogToken.Information:
-                            Definition.Information.Add(GetInformationDictionary((ULogInformationMessageToken)token)); 
+                            Definition.Information.Add(GetInformationDictionary((ULogInformationMessageToken)token));
+                            break;
+                        case ULogToken.MultiInformation:
+                            Definition.MultiInformation.Add(
+                                GetMultiInformationDictionary((ULogMultiInformationMessageToken)token));
                             break;
                     }
+
                     break;
             }
         }
@@ -147,7 +177,7 @@ public class Definition
 {
     public ICollection<IDictionary<string, ULogType>> Format { get; set; }
     public IDictionary<string, string> Information { get; set; }
-    public IDictionary<string, string> MultiInformation { get; set; }
+    public IDictionary<string, ICollection<string>> MultiInformation { get; set; }
 }
 
 public interface IULogFile

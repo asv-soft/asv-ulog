@@ -41,6 +41,16 @@ public class ULogFileService_Tests
             _output.WriteLine($"{info.Key}: {info.Value}");
         }
 
+        foreach (var multiInformation in uLogFileService.Definition.MultiInformation)
+        {
+            
+            _output.WriteLine($"{multiInformation.Key} ' ");
+            foreach (var s in multiInformation.Value)
+            {
+                _output.WriteLine(s);
+            }
+            _output.WriteLine("'");
+        }
         _output.WriteLine("\n===============Definition and Data===============");
 
         foreach (var param in uLogFileService.Parameters)
