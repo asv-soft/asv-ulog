@@ -23,6 +23,15 @@ public class ULogSynchronizationMessageToken : IULogToken
     /// Magic byte sequence for synchronization
     /// </summary>
     public static byte[] SyncMagic { get; } = [0x2F, 0x73, 0x13, 0x20, 0x25, 0x0C, 0xBB, 0x12];
+    
+    /// <summary>
+    /// Full message with header.
+    /// Not part of a real token! 
+    /// </summary>
+    public static byte[] FullMessage { get; } = new byte[] {0x08, 0x00}
+        .Concat([TokenId])
+        .Concat(SyncMagic)
+        .ToArray();
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {

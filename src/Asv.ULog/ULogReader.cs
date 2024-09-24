@@ -2,8 +2,6 @@ using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using ZLogger;
-using Exception = System.Exception;
 
 namespace Asv.ULog;
 
@@ -45,7 +43,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
     : IULogReader
 {
     private ReaderState _state = ReaderState.HeaderSection;
-
+    
     public bool TryRead(ref SequenceReader<byte> rdr, out IULogToken? token)
     {
         token = null;
@@ -84,14 +82,23 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 // if token we couldn't read token (exception occured), then it's corrupted data and we need to find sync message
                 try
                 {
-                    if (!InternalReadToken(ref rdr, ref token)) return false;
+                    if (!InternalReadToken(ref rdr, ref token))
+                    {
+                        return false;
+                    }
+                    
                     Debug.Assert(token is not null);
+                    if (token.TokenType is ULogToken.Unknown)
+                    {
+                        throw new UnknownTokenException();
+                    }
+                    
                     if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
                     {
                         throw new WrongTokenSectionException();
                     }
                 }
-                catch (ULogException e)
+                catch (ULogException)
                 {
                     _state = ReaderState.Corrupted;
                     goto corrupted; // uff, I'm so sorry for this goto
@@ -100,15 +107,58 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 break;
             case ReaderState.Corrupted:
                 corrupted:
-                // TODO: try to find sync message and switch to DataSection
-                throw new Exception("Corrupted ULog file. Sync message not implemented.");
-                break;
+                if (!InternalReadSyncSequence(ref rdr, ref token)) 
+                { 
+                    return false; 
+                }
+                
+                _state = ReaderState.DataSection;
+                return true;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
         CurrentToken = token;
         return true;
+    }
+
+    private bool InternalReadSyncSequence(ref SequenceReader<byte> rdr, ref IULogToken? token)
+    {
+        token = null;
+        var i = 0;
+
+        if (rdr.Length < ULogSynchronizationMessageToken.FullMessage.Length)
+        {
+            return false;
+        }
+        
+        while (rdr.TryRead(out var data))
+        {
+            if (data == ULogSynchronizationMessageToken.FullMessage[i])
+            {
+                ++i;
+            }
+            else
+            {
+                if (data == ULogSynchronizationMessageToken.FullMessage[0]) // check if data is the beginning of a new sequence
+                {
+                    i = 1;
+                    
+                    continue;
+                }
+                
+                i = 0;
+            }
+            
+            if (i == ULogSynchronizationMessageToken.FullMessage.Length)
+            {
+                token = new ULogSynchronizationMessageToken();
+                return true;
+            }
+        }
+
+        rdr.Rewind(ULogSynchronizationMessageToken.FullMessage.Length);
+        return false;
     }
 
     private bool InternalReadToken(ref SequenceReader<byte> rdr, ref IULogToken? token)
@@ -154,14 +204,14 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
             ArrayPool<byte>.Shared.Return(headerBuffer);
         }
     }
-
+    
     private enum ReaderState
     {
         HeaderSection,
         FlagBitsMessage,
         DataSection,
         Corrupted,
-        DefinitionSection
+        DefinitionSection,
     }
 
     public IULogToken? CurrentToken { get; private set; }
