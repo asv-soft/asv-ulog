@@ -74,8 +74,8 @@ public class ULogFlagBitsMessageToken : IULogToken
     {
         BinSerialize.ReadBlock(ref buffer, _compatFlags);
         BinSerialize.ReadBlock(ref buffer, _incompatFlags);
-        for (var i = 0; i < _appendedOffsets.Length; i++)
-            _appendedOffsets[i] = BinSerialize.ReadULong(ref buffer);
+        for (var i = 0; i < _appendedOffsets.Length; i++) 
+            BinSerialize.ReadULong(ref buffer, ref _appendedOffsets[i]);
     }
 
     public void Serialize(ref Span<byte> buffer)
