@@ -88,7 +88,6 @@ public class ULogInformationMessageTokenTests
         ULog.ULog.Encoding.GetChars(value,charBuffer);
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
-
     }
     
     # region Deserialize
