@@ -20,3 +20,6 @@ public class ULogSizeTooSmallException(string section)
     
 public sealed class WrongTokenSectionException() 
     : ULogException("Token was found in a wrong section");
+
+public sealed class UnknownTokenException() 
+    : ULogException("Unknown token was found");

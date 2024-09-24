@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Asv.IO" Version="3.0.0-dev.3" />
+      <PackageReference Include="Asv.IO" Version="$(AsvIOVersion)" />
     </ItemGroup>
 
 </Project>
