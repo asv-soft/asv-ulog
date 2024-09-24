@@ -1,8 +1,6 @@
 using System.Buffers;
-using System.Globalization;
 using System.Text;
 using Asv.ULog.Information;
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
 namespace Asv.ULog.Shell;
@@ -30,8 +28,6 @@ public class UlogFileReader
         }
         AnsiConsole.Write(table);
     }
-
-
 
     public void ReadParams(string filePath)
     {
@@ -154,6 +150,19 @@ public class UlogFileReader
             }
         }
         AnsiConsole.Write(table);
+    }
+    
+    public void ReadLoggedDataById(string filePath, int msgId)
+    {
+        var rdr = CreateSequenceReader(filePath);
+        var reader = ULog.CreateReader();
+        while (reader.TryRead(ref rdr, out var token))
+        {
+            if (token.TokenType == ULogToken.LoggedData && token is ULogLoggedDataMessageToken msg && msg.MessageId == msgId)
+            {
+                AnsiConsole.WriteLine($"{msg.Data}", new Markup($"{msg.MessageId}"));
+            }
+        }
     }
     
     private SequenceReader<byte> CreateSequenceReader(string filePath)
