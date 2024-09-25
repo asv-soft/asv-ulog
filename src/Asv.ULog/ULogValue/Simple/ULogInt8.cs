@@ -15,7 +15,7 @@ public class ULogInt8 : ULogSimple
         _value = value;
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogInt8(_value);
     }
@@ -34,4 +34,6 @@ public class ULogInt8 : ULogSimple
 
     public override int GetByteSize() => sizeof(sbyte);
     internal override ValueType GetValue() => _value;
+
+    public override string? ToString() => _value.ToString();
 }

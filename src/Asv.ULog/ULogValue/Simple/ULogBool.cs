@@ -15,7 +15,7 @@ public class ULogBool : ULogSimple
     {
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogBool(_value);
     }
@@ -32,6 +32,7 @@ public class ULogBool : ULogSimple
     }
     
     public override int GetByteSize() => sizeof(byte);
+    
     internal override ValueType GetValue() => _value;
     
 }

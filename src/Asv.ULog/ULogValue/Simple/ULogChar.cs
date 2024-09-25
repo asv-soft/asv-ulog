@@ -14,7 +14,7 @@ public class ULogChar : ULogSimple
         
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogChar(_value);
     }

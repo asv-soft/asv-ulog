@@ -69,10 +69,11 @@ public static class ULog
     }
         
     public static ULogValue Create(ULogLoggedDataMessageToken data,IReadOnlyDictionary<string, ULogFormatMessageToken> messages,
-        IReadOnlyDictionary<ushort, ULogSubscriptionMessageToken> subscriptions)
+        IReadOnlyDictionary<ushort, ULogSubscriptionMessageToken> subscriptions, out string messageName)
     {
         var sub = subscriptions[data.MessageId];
         var message = messages[sub.MessageName];
+        messageName = sub.MessageName;
         var obj = CreateReference(message.MessageName,messages);
         var span = new ReadOnlySpan<byte>(data.Data);
         obj.Deserialize(ref span);
@@ -82,13 +83,17 @@ public static class ULog
     private static ULogObject CreateReference(string name, IReadOnlyDictionary<string, ULogFormatMessageToken> messages)
     {
         var message = messages[name];
-        var obj = new ULogObject();
+        var builder = ImmutableArray.CreateBuilder<ULogProperty>(message.Fields.Count);
         foreach (var field in message.Fields)
         {
             var prop = Create(field.Type, messages);
-            obj.Properties.Add(new ULogProperty(field.Name,prop));
+            builder.Add(new ULogProperty(field.Name,prop));
         }
-        return obj;
+        if (message.Fields[^1].Name.StartsWith("_padding"))
+        {
+            builder.RemoveAt(builder.Count - 1);
+        }
+        return new ULogObject(builder.ToImmutable());
     }
 
     private static ULogValue Create(ULogTypeDefinition fieldType, IReadOnlyDictionary<string, ULogFormatMessageToken> messages)
@@ -104,14 +109,15 @@ public static class ULog
         }
 
         if (!fieldType.IsArray) return value;
-        
-        var array = new ULogArray();
-        array.Items.Add(value);
+
+        var buidler = ImmutableArray.CreateBuilder<ULogValue>(fieldType.ArraySize);
+        buidler.Add(value);
         for (var i = 1; i < fieldType.ArraySize; i++)
         {
-            array.Items.Add(value.Clone());    
+            buidler.Add(value.CloneToken());    
         }
-        return array;
+
+        return new ULogArray(buidler.ToImmutable());
 
     }
 

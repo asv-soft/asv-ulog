@@ -16,7 +16,7 @@ public class ULogUInt64 : ULogSimple
         
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogUInt64(_value);
     }

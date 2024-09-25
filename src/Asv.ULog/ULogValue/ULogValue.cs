@@ -23,7 +23,7 @@ public enum UValueType
     Char,
 }
 
-public abstract class ULogValue:ISizedSpanSerializable
+public abstract class ULogValue:ISizedSpanSerializable,ICloneable
 {
     #region Static type validation
 
@@ -38,7 +38,6 @@ public abstract class ULogValue:ISizedSpanSerializable
     private static ULogSimple? EnsureSimple(ULogValue value)
     {
         ArgumentNullException.ThrowIfNull(value);
-
         if (value is ULogProperty property)
         {
             value = property.Value;
@@ -257,10 +256,29 @@ public abstract class ULogValue:ISizedSpanSerializable
     }
     
     #endregion
-    
+
+    public ULogValue Root
+    {
+        get
+        {
+            var parent = Parent;
+            if (parent == null)
+            {
+                return this;
+            }
+            while (parent.Parent != null)
+            {
+                parent = parent.Parent;
+            }
+            return parent;
+        }
+    }
+    public ULogContainer? Parent { get; internal set; }
     public abstract UValueType Type { get; }
-    public abstract ULogValue Clone();
+    public object Clone() => CloneToken();
+    public abstract ULogValue CloneToken();
     public abstract void Deserialize(ref ReadOnlySpan<byte> buffer);
     public abstract void Serialize(ref Span<byte> buffer);
     public abstract int GetByteSize();
+    
 }

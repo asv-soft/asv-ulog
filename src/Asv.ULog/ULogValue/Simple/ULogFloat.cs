@@ -16,7 +16,7 @@ public class ULogFloat : ULogSimple
         
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogFloat(_value);
     }

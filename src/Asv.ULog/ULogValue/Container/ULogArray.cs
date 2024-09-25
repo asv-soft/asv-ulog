@@ -1,21 +1,33 @@
+using System.Collections.Immutable;
+
 namespace Asv.ULog;
 
 public class ULogArray : ULogContainer
 {
-    public override ULogValue Clone()
-    {
-        var array = new ULogArray();
-        foreach (var v in _values)
-        {
-            array.Items.Add(v.Clone());
-        }
+    private readonly ImmutableArray<ULogValue> _values;
+    private readonly int _size;
 
-        return array;
+    public ULogArray(ImmutableArray<ULogValue> values)
+    {
+        _values = values;
+        _size = 0;
+        foreach (var value in _values)
+        {
+            value.Parent = this;
+            _size += value.GetByteSize();
+        }
+    }
+    public override ULogValue CloneToken()
+    {
+        var newValues = ImmutableArray.CreateBuilder<ULogValue>(_values.Length);
+        foreach (var value in _values)
+        {
+            newValues.Add(value.CloneToken());
+        }
+        return new ULogArray(newValues.ToImmutable());
     }
 
     public override UValueType Type => UValueType.Array;
-
-    private readonly List<ULogValue> _values = new();
     public IList<ULogValue> Items => _values;
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
@@ -33,5 +45,10 @@ public class ULogArray : ULogContainer
         }
     }
 
-    public override int GetByteSize() => _values.Sum(x => x.GetByteSize());
+    public override int GetByteSize() => _size;
+    
+    public override string ToString()
+    {
+        return $"[{string.Join(", ", _values)}]";
+    }
 }

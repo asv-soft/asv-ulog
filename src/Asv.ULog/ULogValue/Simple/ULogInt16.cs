@@ -16,7 +16,7 @@ public class ULogInt16 : ULogSimple
         _value = value;
     }
 
-    public override ULogValue Clone()
+    public override ULogValue CloneToken()
     {
         return new ULogInt16(_value);
     }
