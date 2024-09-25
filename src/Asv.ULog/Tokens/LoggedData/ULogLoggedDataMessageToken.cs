@@ -5,7 +5,7 @@ namespace Asv.ULog;
 /// <summary>
 /// 'D': Logged Data Message 
 /// </summary>
-public class ULogLoggedDataMessageToken : IULogToken
+public class ULogLoggedDataMessageToken : IULogToken, IEquatable<ULogLoggedDataMessageToken>
 {
     #region Static
 
@@ -46,5 +46,25 @@ public class ULogLoggedDataMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(ushort) /*msg_id*/ + Data.Length /*data*/;
+    }
+
+    public bool Equals(ULogLoggedDataMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return MessageId == other.MessageId && Data.SequenceEqual(other.Data);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogLoggedDataMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MessageId, Data);
     }
 }

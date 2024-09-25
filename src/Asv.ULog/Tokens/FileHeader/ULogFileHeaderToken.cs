@@ -11,7 +11,7 @@ namespace Asv.ULog;
 /// | File magic (7B)                    | Version (1B) | Timestamp (8B) |
 /// ----------------------------------------------------------------------
 /// </summary>
-public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
+public class ULogFileHeaderToken : IULogToken, IEquatable<ULogFileHeaderToken>
 {
     #region Static
 
@@ -83,7 +83,6 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
         return true;
     }
 
-
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         for (var i = 0; i < FileMagic.Length; i++)
@@ -111,5 +110,25 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
     public override string ToString()
     {
         return $"Version:{Version},Timestamp:{Timestamp}";
+    }
+
+    public bool Equals(ULogFileHeaderToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Version == other.Version && Timestamp == other.Timestamp;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogFileHeaderToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Version, Timestamp);
     }
 }

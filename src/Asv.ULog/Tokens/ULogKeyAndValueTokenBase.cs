@@ -11,8 +11,15 @@ namespace Asv.ULog;
 /// char key[key_len];
 /// char value[header.msg_size-2-key_len]
 /// </summary>
-public abstract class ULogKeyAndValueTokenBase : IULogToken
+public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyAndValueTokenBase>
 {
+    #region Static
+
+    private const byte ArrayStart = (byte)'[';
+    private const byte ArrayEnd = (byte)']';
+
+    #endregion
+    
     public virtual void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         var keyLen = BinSerialize.ReadByte(ref buffer);
@@ -25,7 +32,9 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken
 
     public virtual void Serialize(ref Span<byte> buffer)
     {
-        BinSerialize.WriteByte(ref buffer, (byte)(Key.Type.TypeName.Length + sizeof(byte) + Key.Name.Length));
+        var arraySizeStr = Key.Type.IsArray ? $"[{Key.Type.ArraySize}] " : " ";
+        var additionalSymbolsSize = arraySizeStr.Length;
+        BinSerialize.WriteByte(ref buffer, (byte)(Key.Type.TypeName.Length + additionalSymbolsSize + Key.Name.Length));
         Key.Serialize(ref buffer);
         Value.CopyTo(buffer);
         buffer = buffer[Value.Length..];
@@ -42,4 +51,25 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken
 
     public ULogTypeAndNameDefinition Key { get; set; } = null!;
     public byte[] Value { get; set; }
+
+    public bool Equals(ULogKeyAndValueTokenBase? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return TokenName == other.TokenName && TokenType == other.TokenType && TokenSection == other.TokenSection && 
+               Key.Equals(other.Key) && Value.SequenceEqual(other.Value);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogKeyAndValueTokenBase)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(TokenName, (int)TokenType, (int)TokenSection, Key, Value);
+    }
 }

@@ -5,7 +5,7 @@ namespace Asv.ULog;
 /// 
 /// Message so that a reader can recover from a corrupt message by searching for the next sync message.
 /// </summary>
-public class ULogSynchronizationMessageToken : IULogToken
+public class ULogSynchronizationMessageToken : IULogToken, IEquatable<ULogSynchronizationMessageToken>
 {
     #region Static
 
@@ -53,4 +53,16 @@ public class ULogSynchronizationMessageToken : IULogToken
     {
         return SyncMagic.Length;
     }
+
+    public bool Equals(ULogSynchronizationMessageToken? other) => true;
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogSynchronizationMessageToken)obj);
+    }
+
+    public override int GetHashCode() => base.GetHashCode();
 }

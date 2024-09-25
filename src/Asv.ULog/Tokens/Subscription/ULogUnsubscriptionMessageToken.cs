@@ -7,7 +7,7 @@ namespace Asv.ULog;
 ///
 /// Unsubscribe a message, to mark that it will not be logged anymore (not used currently).
 /// </summary>
-public class ULogUnsubscriptionMessageToken : IULogToken
+public class ULogUnsubscriptionMessageToken : IULogToken, IEquatable<ULogUnsubscriptionMessageToken>
 {
     #region Static
 
@@ -39,5 +39,25 @@ public class ULogUnsubscriptionMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(ushort) /*MessageId*/;
+    }
+
+    public bool Equals(ULogUnsubscriptionMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return MessageId == other.MessageId;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogUnsubscriptionMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return MessageId.GetHashCode();
     }
 }
