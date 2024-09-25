@@ -3,5 +3,6 @@
     <ProductVersion>0.0.1</ProductVersion>
     <ProductPrevVersion>0.0.0</ProductPrevVersion>
     <AsvIOVersion>3.0.0-dev.3</AsvIOVersion>
+    <SpectreConsoleCliVersion>0.49.1</SpectreConsoleCliVersion>
   </PropertyGroup>
 </Project>

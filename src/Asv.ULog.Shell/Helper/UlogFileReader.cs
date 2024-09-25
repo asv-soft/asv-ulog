@@ -9,15 +9,11 @@ public class UlogFileReader
 {
     public void ReadULogFile(string filePath)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
-        var index = 0;
-        var stat = Enum.GetValues<ULogToken>().ToDictionary(token => token, token => 0);
-        while (reader.TryRead(ref rdr, out var token))
-        {
-            stat[token.TokenType] += 1;
-            index++;
-        } 
+        var tokens = ReadTokens(filePath, token => true);
+        var index = tokens.Count;
+        var stat = tokens.GroupBy(t => t.TokenType)
+            .ToDictionary(g => g.Key, g => g.Count());
+
         AnsiConsole.MarkupLine($"[green]Total tokens read:[/] [bold red]{index}[/]");
         var table = new Table();
         table.AddColumns("[blue]Tokens[/]", "[green]Number of tokens[/]");
@@ -31,29 +27,21 @@ public class UlogFileReader
 
     public void ReadParams(string filePath)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
-        var index = 0;
-        var paramsDict = new Dictionary<string, IList<(ULogType,byte[])>>();
-        while (reader.TryRead(ref rdr, out var token))
+        var tokens = ReadTokens(filePath, token => token.TokenType == ULogToken.Parameter && token is ULogParameterMessageToken);
+        var paramsDict = new Dictionary<string, IList<(ULogType, byte[])>>();
+        foreach (var token in tokens.OfType<ULogParameterMessageToken>())
         {
-            if (token.TokenType == ULogToken.Parameter)
+            if (!paramsDict.ContainsKey(token.Key.Name))
             {
-                if (token is ULogParameterMessageToken param)
-                {
-                    index++;
-                    if (!paramsDict.ContainsKey(param.Key.Name))
-                    {
-                        paramsDict[param.Key.Name] = new List<(ULogType,byte[])> { new (param.Key.Type.BaseType,param.Value) }; 
-                        continue;
-                    }
-
-                    paramsDict[param.Key.Name].Add(new (param.Key.Type.BaseType,param.Value));
-                }
+                paramsDict[token.Key.Name] = new List<(ULogType, byte[])> { (token.Key.Type.BaseType, token.Value) };
+            }
+            else
+            {
+                paramsDict[token.Key.Name].Add((token.Key.Type.BaseType, token.Value));
             }
         }
-        AnsiConsole.Markup($"[green]Total params read:[/] [bold red]{index}[/]\n");
-
+        
+        AnsiConsole.Markup($"[green]Total params read:[/] [bold red]{tokens.Count}[/]\n");
         var table = new Table();
         table.AddColumns("[blue]Parameter[/]", "[green]Value[/]");
         table.Border(TableBorder.Double);
@@ -62,7 +50,7 @@ public class UlogFileReader
             var sb = new StringBuilder();
             foreach (var v in param.Value)
             {
-                sb.Append(ULog.GetSimpleValue(v.Item1,v.Item2));
+                sb.Append(ULog.GetSimpleValue(v.Item1, v.Item2));
             }
             table.AddRow(new Markup($"[blue]{param.Key}[/]"), new Markup($"[red]{sb}[/]"));
         }
@@ -71,30 +59,24 @@ public class UlogFileReader
     
     public void ReadInfoMessages(string filePath)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
-        var index = 0;
-        var paramsDict = new Dictionary<string, IList<(ULogType,byte[])>>();
-        while (reader.TryRead(ref rdr, out var token))
-        {
-            if (token != null && token.TokenType != ULogToken.Information) continue;
-            if (token is not ULogInformationMessageToken param) continue;
-            if (!paramsDict.TryGetValue(param.Key.Name, out IList<(ULogType, byte[])>? value))
-            {
-                value = new List<(ULogType,byte[])>
-                {
-                    new (param.Key.Type.BaseType,param.Value)
-                };
-                paramsDict[param.Key.Name] = value;
-                index++;
-                continue;
-            }
+        var tokens = ReadTokens(filePath, token => token.TokenType == ULogToken.Information && token is ULogInformationMessageToken);
+        var paramsDict = new Dictionary<string, IList<(ULogType, byte[])>>();
 
-            value.Add(new ValueTuple<ULogType, byte[]>(param.Key.Type.BaseType, param.Value));
+        foreach (var token in tokens.OfType<ULogInformationMessageToken>())
+        {
+            if (!paramsDict.TryGetValue(token.Key.Name, out var value))
+            {
+                value = new List<(ULogType, byte[])> { (token.Key.Type.BaseType, token.Value) };
+                paramsDict[token.Key.Name] = value;
+            }
+            else
+            {
+                value.Add((token.Key.Type.BaseType, token.Value));
+            }
         }
-        AnsiConsole.MarkupLine($"[green]Total info messages read:[/] [bold red]{index}[/]");
+        AnsiConsole.MarkupLine($"[green]Total info messages read:[/] [bold red]{tokens.Count}[/]");
         AnsiConsole.MarkupLine("[blue]Info messages:[/]");
-        
+    
         foreach (var param in paramsDict)
         {
             var sb = new StringBuilder();
@@ -102,67 +84,49 @@ public class UlogFileReader
             {
                 if (v.Item1 == ULogType.Char)
                 {
-                    var type = CharToString(v.Item2).ToString();
-                    sb.Append(type);
+                    sb.Append(CharToString(v.Item2).ToString());
                 }
                 else
                 {
-                    sb.Append(ULog.GetSimpleValue(v.Item1,v.Item2));
+                    sb.Append(ULog.GetSimpleValue(v.Item1, v.Item2));
                 }
             }
             AnsiConsole.MarkupLine($"[blue]{param.Key}[/]: [red]{sb.ToString().Replace("[", "[[").Replace("]", "]]")}[/]");
-
         }
     }
+    
     public void ReadMessages(string filePath)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
-        var index = 0;
-        while (reader.TryRead(ref rdr, out var token))
+        var tokens = ReadTokens(filePath, token => token.TokenType == ULogToken.LoggedString && token is ULogLoggedStringMessageToken);
+        foreach (var token in tokens.OfType<ULogLoggedStringMessageToken>())
         {
-            if (token.TokenType == ULogToken.LoggedString)
-            {
-                index++;
-                if (token is ULogLoggedStringMessageToken msg)
-                {
-                    var time = new TimeSpan((long)msg.TimeStamp * 10);
-                    AnsiConsole.MarkupLine($"[blue]{time:hh\\:mm\\:ss}[/]: [yellow]{msg.LogLevel}[/] [green]{msg.Message.Replace("[", "[[").Replace("]","]]")}[/]");
-                }
-            }
+            var time = new TimeSpan((long)token.TimeStamp * 10);
+            AnsiConsole.MarkupLine($"[blue]{time:hh\\:mm\\:ss}[/]: [yellow]{token.LogLevel}[/] [green]{token.Message.Replace("[", "[[").Replace("]", "]]")}[/]");
         }
     }
     public void ReadSubscriptionsMessages(string filePath)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
+        var tokens = ReadTokens(filePath, token => token.TokenType == ULogToken.Subscription && token is ULogSubscriptionMessageToken);
         var table = new Table();
         table.AddColumns("[blue]Name[/] ([yellow]multi id[/], [yellow]message size in bytes[/])", "[green]Value[/]");
         table.Border(TableBorder.Double);
-        while (reader.TryRead(ref rdr, out var token))
+
+        foreach (var token in tokens.OfType<ULogSubscriptionMessageToken>())
         {
-            if (token.TokenType == ULogToken.Subscription)
-            {
-                if (token is ULogSubscriptionMessageToken msg)
-                {
-                    table.AddRow(new Markup($"[blue]{msg.MessageName}[/] ([yellow]{msg.MultiId}[/], [yellow]{msg.GetByteSize()}[/])"), new Markup($"{msg.MessageId}"));
-                }
-            }
+            table.AddRow(new Markup($"[blue]{token.MessageName}[/] ([yellow]{token.MultiId}[/], [yellow]{token.GetByteSize()}[/])"), 
+                new Markup($"{token.MessageId}"));
         }
         AnsiConsole.Write(table);
     }
     
     public void ReadLoggedDataById(string filePath, int msgId)
     {
-        var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
-        while (reader.TryRead(ref rdr, out var token))
+        var tokens = ReadTokens(filePath, token => token.TokenType == ULogToken.LoggedData && token is ULogLoggedDataMessageToken loggedData && loggedData.MessageId == msgId);
+        foreach (var token in tokens.OfType<ULogLoggedDataMessageToken>())
         {
-            if (token.TokenType == ULogToken.LoggedData && token is ULogLoggedDataMessageToken msg && msg.MessageId == msgId)
-            {
-                AnsiConsole.WriteLine($"{msg.Data}", new Markup($"{msg.MessageId}"));
-            }
+            AnsiConsole.WriteLine($"{Convert.ToBase64String(token.Data)}", new Markup($"{token.MessageId}"));
         }
+        AnsiConsole.MarkupLine($"[green]Total logged data messages for ID {msgId}:[/] [bold red]{tokens.Count}[/]");
     }
     
     private SequenceReader<byte> CreateSequenceReader(string filePath)
@@ -179,5 +143,22 @@ public class UlogFileReader
         ULog.Encoding.GetChars(value,charBuffer);
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
+    }
+    
+    private List<IULogToken> ReadTokens(string filePath, Func<IULogToken, bool> filter)
+    {
+        var rdr = CreateSequenceReader(filePath);
+        var reader = ULog.CreateReader();
+        var tokens = new List<IULogToken>();
+
+        while (reader.TryRead(ref rdr, out var token))
+        {
+            if (filter(token))
+            {
+                tokens.Add(token);
+            }
+        }
+
+        return tokens;
     }
 }

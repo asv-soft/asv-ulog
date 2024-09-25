@@ -22,13 +22,12 @@ public sealed class UlogInfo : Command<UlogInfo.Settings>
             return -1;
         }
         var rdr = new UlogFileReader();
-        rdr.ReadInfoMessages(settings.FilePath);
+        rdr.ReadInfoMessages(settings.FilePath); 
         rdr.ReadSubscriptionsMessages(settings.FilePath);
         var msgIdToShow = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow][[Optional]][/]: Which subscription message to display? ")
                 .AllowEmpty());
         rdr.ReadLoggedDataById(settings.FilePath, Int32.Parse(msgIdToShow));
         return 0;
-        
     }
 }
