@@ -28,6 +28,11 @@ public static class ULog
         return new ULogReader(builder.ToImmutable(), logger);
     }
 
+    public static IULogWriter CreateWriter(ILogger? logger = null)
+    {
+        return new ULogWriter(logger);
+    }
+
     public static ValueType GetSimpleValue(ULogType type, byte[] value)
     {
         switch (type)

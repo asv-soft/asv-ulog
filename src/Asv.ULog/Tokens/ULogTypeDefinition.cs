@@ -145,11 +145,12 @@ public class ULogTypeDefinition : ISizedSpanSerializable
         {
             _typeName.CopyTo(ref buffer, ULog.Encoding);
             var temp = ArrayStart;
-            var writed = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
-            buffer = buffer[writed..];
+            var written = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            buffer = buffer[written..];
             _arraySize.ToString().CopyTo(ref buffer, ULog.Encoding);
             temp = ArrayEnd;
-            writed = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            written = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            buffer = buffer[written..];
         }
         else
         {
