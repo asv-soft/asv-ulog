@@ -8,15 +8,12 @@ using ZLogger;
 
 namespace Asv.ULog;
 
-public class ULogFileService : ULogFileModel
+public class ULogFileService : ULogFileModel,IULogFile
 {
     private readonly IULogReader _reader;
     private ReadOnlySequence<byte> _data;
     public List<ULogParameterMessageToken> Parameters { get; set; } = new();
 
-    public ULogFileService()
-    {
-    }
 
     private Dictionary<string, ULogType> GetFormatDictionary(ULogFormatMessageToken format)
     {
@@ -26,15 +23,6 @@ public class ULogFileService : ULogFileModel
         {
             if (field.Name.Contains("_padding")) continue;
             dictionary.Add(field.Name, field.Type.BaseType);
-        }
-
-        foreach (var item in dictionary)
-        {
-            if (item.Value is ULogType.ReferenceType)
-            {
-                var reference = dictionary.FirstOrDefault(_ => _.Key.Equals(item.Value.ToString()));
-                //item = new KeyValuePair<string,ULogType>(item.Key,reference.Value);
-            }
         }
 
         return dictionary;
@@ -55,21 +43,21 @@ public class ULogFileService : ULogFileModel
         {
             return new KeyValuePair<string, ICollection<string>>(information.Key.Name, collection);
         }
+
         var references = Definition.MultiInformation.First(_ => _.Key.Equals(information.Key.Name));
         Definition.MultiInformation.Remove(references);
-            foreach (var refer in references.Value)
-            {
-                collection.Add($"{refer}");
-            }
+        foreach (var refer in references.Value)
+        {
+            collection.Add($"{refer}");
+        }
+
         return new KeyValuePair<string, ICollection<string>>(information.Key.Name, collection);
     }
 
-    public string GetParameter(ULogParameterMessageToken param)
+    public KeyValuePair<string,string> GetParameter(ULogParameterMessageToken param)
     {
-        var result = new StringBuilder();
-        result.Append("Parameter : ");
         var value = ValueToString(param.Key.Type.BaseType, param.Value);
-        return result.Append($"{param.Key.Name} = {value}").ToString();
+        return new KeyValuePair<string, string>(param.Key.Name,value);
     }
 
     private string ValueToString(ULogType type, byte[] value)
@@ -81,6 +69,9 @@ public class ULogFileService : ULogFileModel
                 return BitConverter.ToInt32(value).ToString(CultureInfo.InvariantCulture);
             case ULogType.Char:
                 return CharToString(value).ToString();
+            case ULogType.Float:
+                var single = BitConverter.ToSingle(value).ToString();
+                return single;
             default:
                 throw new ArgumentNullException("Wrong ulog value type for InformationTokenValue");
         }
@@ -94,13 +85,8 @@ public class ULogFileService : ULogFileModel
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
     }
-
     public void Load(ref ReadOnlySequence<byte> data, IULogReader reader)
     {
-        Definition = new();
-        Definition.Format = new Collection<IDictionary<string, ULogType>>();
-        Definition.Information = new Dictionary<string, string>();
-        Definition.MultiInformation = new Dictionary<string, ICollection<string>>();
         Data = new List<IULogToken>();
         DefinitionAndData = new List<IULogToken>();
         Unknown = new List<IULogToken>();
@@ -129,6 +115,12 @@ public class ULogFileService : ULogFileModel
                             Definition.MultiInformation.Add(
                                 GetMultiInformationDictionary((ULogMultiInformationMessageToken)token));
                             break;
+                        case ULogToken.Parameter:
+                            Definition.Parameters.Add(GetParameter((ULogParameterMessageToken)token));
+                            break;
+                        case ULogToken.Unknown:
+                            Unknown.Add(token);
+                            break;
                     }
                     break;
                 case (TokenPlaceFlags.DefinitionAndData):
@@ -141,14 +133,18 @@ public class ULogFileService : ULogFileModel
                             Definition.MultiInformation.Add(
                                 GetMultiInformationDictionary((ULogMultiInformationMessageToken)token));
                             break;
+                        case ULogToken.Parameter:
+                            Definition.Parameters.Add(GetParameter((ULogParameterMessageToken)token));
+                            break;
                     }
 
                     break;
             }
         }
     }
+    
 
-    public ULogFileModel Save()
+    public void Save()
     {
         throw new NotImplementedException();
     }
@@ -161,13 +157,11 @@ public class ULogFileService : ULogFileModel
     }
 }
 
-public class ULogFileModel : IULogFile
+public class ULogFileModel
 {
     public TimeSpan Time { get; set; }
     public byte Version { get; set; }
-    public Definition Definition { get; set; }
-
-    public ICollection<IULogToken> Subscription { get; set; }
+    public Definition Definition { get; set; } = new();
     public ICollection<IULogToken> Data { get; set; }
     public ICollection<IULogToken> DefinitionAndData { get; set; }
     public ICollection<IULogToken> Unknown { get; set; }
@@ -175,9 +169,13 @@ public class ULogFileModel : IULogFile
 
 public class Definition
 {
-    public ICollection<IDictionary<string, ULogType>> Format { get; set; }
-    public IDictionary<string, string> Information { get; set; }
-    public IDictionary<string, ICollection<string>> MultiInformation { get; set; }
+    public ICollection<IDictionary<string, ULogType>> Format { get; set; } = new List<IDictionary<string, ULogType>>();
+    public IDictionary<string, string> LoggedDataMessage { get; set; } = new Dictionary<string, string>(); 
+    public IDictionary<string, string> Information { get; set; } = new Dictionary<string, string>();
+    public IDictionary<string, ICollection<string>> MultiInformation { get; set; } = new Dictionary<string, ICollection<string>>();
+    public IDictionary<string, string> Parameters { get; set; } = new Dictionary<string, string>();
+    public IDictionary<string, string> DefaultParameters { get; set; } = new Dictionary<string, string>();
+
 }
 
 public interface IULogFile
@@ -186,6 +184,7 @@ public interface IULogFile
     public byte Version { get; set; }
     public Definition Definition { get; set; }
     public ICollection<IULogToken> DefinitionAndData { get; set; }
-    public ICollection<IULogToken> Subscription { get; set; }
     public ICollection<IULogToken> Data { get; set; }
+    public void Load(ref ReadOnlySequence<byte> data, IULogReader reader);
+    public void Save();
 }

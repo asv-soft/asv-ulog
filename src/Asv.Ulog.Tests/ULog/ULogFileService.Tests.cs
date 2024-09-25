@@ -27,6 +27,7 @@ public class ULogFileService_Tests
         _output.WriteLine("===============Header===============");
         _output.WriteLine($"Version: {uLogFileService.Version}");
         _output.WriteLine($"Time: {uLogFileService.Time}");
+        _output.WriteLine($"Unknown tokens found: {uLogFileService.Unknown.Count}");
         _output.WriteLine("\n===============Definition===============");
         foreach (var definition in uLogFileService.Definition.Format)
         {
@@ -38,24 +39,24 @@ public class ULogFileService_Tests
         }
         foreach (var info in uLogFileService.Definition.Information)
         {
-            _output.WriteLine($"{info.Key}: {info.Value}");
+            
+            _output.WriteLine($"Information: {info.Key}: {info.Value}");
         }
 
         foreach (var multiInformation in uLogFileService.Definition.MultiInformation)
         {
-            
-            _output.WriteLine($"{multiInformation.Key} ' ");
+            _output.WriteLine($"MultiInformation: {multiInformation.Key} ' ");
             foreach (var s in multiInformation.Value)
             {
-                _output.WriteLine(s);
+                _output.WriteLine($"{s}");
             }
             _output.WriteLine("'");
         }
         _output.WriteLine("\n===============Definition and Data===============");
 
-        foreach (var param in uLogFileService.Parameters)
+        foreach (var param in uLogFileService.Definition.Parameters)
         {
-            _output.WriteLine($"{uLogFileService.Time} {param.TokenName} {param.Value}");
+            _output.WriteLine($"param '{param.Key}' = {param.Value}");
         }
     }
 }
