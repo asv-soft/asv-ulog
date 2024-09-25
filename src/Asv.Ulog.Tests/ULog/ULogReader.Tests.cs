@@ -16,7 +16,7 @@ public class ULogReaderTests
     [Fact]
     public void Calculate_ulog_file_statistic()
     {
-        var bytes = TestData.ulog_log_small;
+        var bytes = TestData.ulog_sample;
         var data = new ReadOnlySequence<byte>(bytes);
         var rdr = new SequenceReader<byte>(data); 
         var reader = ULog.ULog.CreateReader();
@@ -38,7 +38,7 @@ public class ULogReaderTests
     [Fact]
     public void TryRead_HasCorruptedBytes_Success() // TODO: find out why reader doesn't read all tokens
     {
-        var bytes = TestData.ulog_log_small;
+        var bytes = TestData.ulog_sample;
         var wrongBytesCount = 199;
         var random = new Random(4);
         var wrongBytes = new byte[wrongBytesCount];
@@ -77,7 +77,7 @@ public class ULogReaderTests
     [Fact]
     public void Read_ulog_file_header_and_flag_token_with_check_values()
     {
-        var data = new ReadOnlySequence<byte>(TestData.ulog_log_small);
+        var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data);
         var reader = ULog.ULog.CreateReader();
 

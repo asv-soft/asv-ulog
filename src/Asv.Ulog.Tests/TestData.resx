@@ -18,22 +18,22 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-    <data name="ulog-log-small" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>Resources\ulog_log_small.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-    </data>
     <data name="ulog-sample" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>Resources\ulog_sample.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="ulog-sample-appended" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>Resources\ulog_sample_appended.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="ulog-missing-flagbits" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Resources\ulog_missing_flagbits.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="ulog-sample-appended-multiple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>Resources\ulog_sample_appended_multiple.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="ulog-with-additional-data" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Resources\ulog_with_additional_data.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="ulog-sample-logging-tagged-and-default-params" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>Resources\ulog_sample_logging_tagged_and_default_params.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="ulog-with-additional-data-multiple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Resources\ulog_with_additional_data_multiple.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="ulog-sample-px4-events" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>Resources\ulog_sample_px4_events.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="ulog-with-logging-tagged-and-default-params" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Resources\ulog_with_logging_tagged_and_default_params.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ulog-with-px4-events" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>Resources\ulog_with_px4_events.ulg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
 </root>
