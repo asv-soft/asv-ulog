@@ -5,23 +5,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Asv.ULog;
 
-public enum ULogToken
+public enum ULogToken : byte
 {
     Unknown,
     FileHeader,
-    FlagBits,
-    Format,
-    Information,
-    MultiInformation,
-    Parameter,
-    DefaultParameter,
-    Unsubscription,
-    Subscription,
-    LoggedData,
-    LoggedString,
-    Synchronization,
-    TaggedLoggedString,
-    Dropout
+    FlagBits = (byte)'B',
+    Format = (byte)'F',
+    Information = (byte)'I',
+    MultiInformation = (byte)'M',
+    Parameter = (byte)'P',
+    DefaultParameter = (byte)'Q',
+    Unsubscription = (byte)'R',
+    Subscription = (byte)'A',
+    LoggedData = (byte)'D',
+    LoggedString = (byte)'L',
+    Synchronization = (byte)'S',
+    TaggedLoggedString = (byte)'C',
+    Dropout = (byte)'O',
 }
 
 public interface IULogReader
