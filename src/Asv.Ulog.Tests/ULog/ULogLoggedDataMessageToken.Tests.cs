@@ -16,7 +16,7 @@ public class ULogLoggedDataMessageTokenTests
     [Fact]
     public void ReadLoggedDataFromFile()
     {
-        var data = new ReadOnlySequence<byte>(TestData.ulog_log_small);
+        var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data); 
         var reader = ULog.ULog.CreateReader();
 
