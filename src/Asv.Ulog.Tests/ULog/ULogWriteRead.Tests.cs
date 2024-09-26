@@ -227,7 +227,7 @@ public class ULogWriteReadTests
                 continue;
             }
         }
-        File.WriteAllBytes("Test/ulog_write_read_test.ulg", buffer.WrittenMemory.ToArray());
+        File.WriteAllBytes("ulog_write_read_test.ulg", buffer.WrittenMemory.ToArray());
         
         Assert.Equal(ComputeHash(buffer.WrittenMemory.ToArray()), ComputeHash(bytes));
     }
