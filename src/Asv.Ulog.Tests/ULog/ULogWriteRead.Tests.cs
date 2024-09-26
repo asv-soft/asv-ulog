@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using Asv.ULog;
 using Asv.ULog.Information;
@@ -173,6 +174,62 @@ public class ULogWriteReadTests
         Assert.Equal(hash1, hash2);
 
         for (var i = 0; i < read.Count; i++) Assert.True(read[i].Equals(written[i]));
+    }
+
+    [Fact]
+    public void RewriteFullTestFile()
+    {
+        var bytes = TestData.ulog_sample_px4_events;
+        var data = new ReadOnlySequence<byte>(bytes);
+        var rdr = new SequenceReader<byte>(data); 
+        var reader = ULog.ULog.CreateReader();
+        var tokens = new List<IULogToken>();
+        while (reader.TryRead(ref rdr, out var token))
+        {
+            Assert.NotNull(token);
+            tokens.Add(token);
+        }
+        
+        var buffer = new ArrayBufferWriter<byte>();
+
+        ULogFileHeaderToken? header = null;
+        ULogFlagBitsMessageToken? fBits = null;
+        var isHeaderWrote = false;
+        foreach (var token in tokens)
+        {
+            if (header != null && fBits != null && !isHeaderWrote)
+            {
+                _writer.AddHeaderAndFlagBits(buffer, header, fBits);
+                isHeaderWrote = true;
+            }
+            
+            if (token.TokenType == ULogToken.FileHeader)
+            {
+                header = token as ULogFileHeaderToken;
+                continue;
+            }
+
+            if (token.TokenType == ULogToken.FlagBits)
+            {
+                fBits = token as ULogFlagBitsMessageToken;
+                continue;
+            }
+
+            if (token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+            {
+                _writer.AppendDefinition(buffer, token);
+                continue;
+            }
+
+            if (token.TokenSection.HasFlag(TokenPlaceFlags.Data))
+            {
+                _writer.AppendData(buffer, token);
+                continue;
+            }
+        }
+        File.WriteAllBytes("Test/ulog_write_read_test.ulg", buffer.WrittenMemory.ToArray());
+        
+        Assert.Equal(ComputeHash(buffer.WrittenMemory.ToArray()), ComputeHash(bytes));
     }
     
     private static string ComputeHash(byte[] data)
