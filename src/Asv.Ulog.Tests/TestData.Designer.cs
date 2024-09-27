@@ -118,5 +118,15 @@ namespace Asv.Ulog.Tests {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ulog_write_read_test {
+            get {
+                object obj = ResourceManager.GetObject("ulog-write-read-test", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

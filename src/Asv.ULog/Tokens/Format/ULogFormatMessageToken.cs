@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Asv.Common;
 using Asv.IO;
 
 namespace Asv.ULog;
@@ -9,7 +10,7 @@ namespace Asv.ULog;
 ///
 /// Format message defines a single message name and its inner fields in a single string.
 /// </summary>
-public partial class ULogFormatMessageToken : IULogToken
+public partial class ULogFormatMessageToken : IULogToken, IEquatable<ULogFormatMessageToken>
 {
     #region Static
 
@@ -122,5 +123,25 @@ public partial class ULogFormatMessageToken : IULogToken
     {
         return ULog.Encoding.GetByteCount(MessageName) + MessageAndFieldsSeparatorByteSize +
                Fields.Sum(x => x.GetByteSize() + FieldSeparatorByteSize);
+    }
+
+    public bool Equals(ULogFormatMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return MessageName == other.MessageName && Fields.SequenceEqual(other.Fields);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogFormatMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MessageName, Fields);
     }
 }

@@ -93,4 +93,5 @@ public class ULogReaderTests
         Assert.NotNull(flag);  
         Assert.Equal(ULogToken.FlagBits,flag.TokenType);
     }
+
 }

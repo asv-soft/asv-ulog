@@ -7,7 +7,7 @@ namespace Asv.ULog;
 ///
 /// This message provides information to the log parser whether the log is parsable or not.
 /// </summary>
-public class ULogFlagBitsMessageToken : IULogToken
+public class ULogFlagBitsMessageToken : IULogToken, IEquatable<ULogFlagBitsMessageToken>
 {
     #region Static
 
@@ -89,5 +89,26 @@ public class ULogFlagBitsMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(byte) * 8 + sizeof(byte) * 8 + sizeof(ulong) * 3;
+    }
+
+    public bool Equals(ULogFlagBitsMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return CompatFlags.SequenceEqual(other.CompatFlags) && IncompatFlags.SequenceEqual(other.IncompatFlags) && 
+               AppendedOffsets.SequenceEqual(other.AppendedOffsets);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogFlagBitsMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(CompatFlags, IncompatFlags, AppendedOffsets);
     }
 }

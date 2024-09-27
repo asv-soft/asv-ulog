@@ -7,7 +7,7 @@ namespace Asv.ULog;
 /// 
 /// Logged string message, i.e. printf() output.
 /// </summary>
-public class ULogLoggedStringMessageToken : IULogToken
+public class ULogLoggedStringMessageToken : IULogToken, IEquatable<ULogLoggedStringMessageToken>
 {
     #region Static
 
@@ -115,5 +115,25 @@ public class ULogLoggedStringMessageToken : IULogToken
         /// Debug-level messages
         /// </summary>
         Debug = '7'
+    }
+
+    public bool Equals(ULogLoggedStringMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Message == other.Message && LogLevel == other.LogLevel && TimeStamp == other.TimeStamp;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogLoggedStringMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Message, (int)LogLevel, TimeStamp);
     }
 }

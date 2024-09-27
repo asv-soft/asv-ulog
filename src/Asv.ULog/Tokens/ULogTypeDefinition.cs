@@ -25,7 +25,7 @@ public enum ULogType
 ///
 /// e.g., float[5], int8_t, etc.
 /// </summary>
-public class ULogTypeDefinition : ISizedSpanSerializable
+public class ULogTypeDefinition : ISizedSpanSerializable, IEquatable<ULogTypeDefinition>
 {
     #region Static
 
@@ -164,5 +164,25 @@ public class ULogTypeDefinition : ISizedSpanSerializable
             ? ULog.Encoding.GetByteCount(_typeName) +
               ArrayStartByteSize + ULog.Encoding.GetByteCount(_arraySize.ToString()) + ArrayEndByteSize
             : ULog.Encoding.GetByteCount(_typeName);
+    }
+
+    public bool Equals(ULogTypeDefinition? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ArraySize == other.ArraySize && TypeName == other.TypeName && BaseType == other.BaseType;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogTypeDefinition)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ArraySize, TypeName, (int)BaseType);
     }
 }
