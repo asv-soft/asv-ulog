@@ -179,7 +179,7 @@ public class ULogWriteReadTests
     [Fact]
     public void RewriteFullTestFile()
     {
-        var bytes = TestData.ulog_sample_px4_events;
+        var bytes = TestData.ulog_with_px4_events;
         var data = new ReadOnlySequence<byte>(bytes);
         var rdr = new SequenceReader<byte>(data); 
         var reader = ULog.ULog.CreateReader();

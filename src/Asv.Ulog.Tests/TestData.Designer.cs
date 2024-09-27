@@ -62,9 +62,9 @@ namespace Asv.Ulog.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ulog_log_small {
+        internal static byte[] ulog_missing_flagbits {
             get {
-                object obj = ResourceManager.GetObject("ulog-log-small", resourceCulture);
+                object obj = ResourceManager.GetObject("ulog-missing-flagbits", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -82,9 +82,9 @@ namespace Asv.Ulog.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ulog_sample_appended {
+        internal static byte[] ulog_with_additional_data {
             get {
-                object obj = ResourceManager.GetObject("ulog-sample-appended", resourceCulture);
+                object obj = ResourceManager.GetObject("ulog-with-additional-data", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -92,9 +92,9 @@ namespace Asv.Ulog.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ulog_sample_appended_multiple {
+        internal static byte[] ulog_with_additional_data_multiple {
             get {
-                object obj = ResourceManager.GetObject("ulog-sample-appended-multiple", resourceCulture);
+                object obj = ResourceManager.GetObject("ulog-with-additional-data-multiple", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -102,9 +102,9 @@ namespace Asv.Ulog.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ulog_sample_logging_tagged_and_default_params {
+        internal static byte[] ulog_with_logging_tagged_and_default_params {
             get {
-                object obj = ResourceManager.GetObject("ulog-sample-logging-tagged-and-default-params", resourceCulture);
+                object obj = ResourceManager.GetObject("ulog-with-logging-tagged-and-default-params", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -112,9 +112,9 @@ namespace Asv.Ulog.Tests {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ulog_sample_px4_events {
+        internal static byte[] ulog_with_px4_events {
             get {
-                object obj = ResourceManager.GetObject("ulog-sample-px4-events", resourceCulture);
+                object obj = ResourceManager.GetObject("ulog-with-px4-events", resourceCulture);
                 return ((byte[])(obj));
             }
         }
