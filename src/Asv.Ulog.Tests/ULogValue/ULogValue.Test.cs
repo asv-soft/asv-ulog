@@ -10,9 +10,9 @@ public class ULogValueTest(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
 
     [Fact]
-    public void Read_data_From_File_And_Parse()
+    public void ToString_Read_Data_From_File_And_Print_Values_To_Output()
     {
-        var data = new ReadOnlySequence<byte>(TestData.ulog_log_small);
+        var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data);
         var reader = ULog.ULog.CreateReader();
         var format = new Dictionary<string, ULogFormatMessageToken>();
