@@ -6,7 +6,7 @@ namespace Asv.ULog.Information;
 /// 'M': Multi Information Message
 /// Multi information message serves the same purpose as the information message, but for long messages or multiple messages with the same key.
 /// </summary>
-public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase
+public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase, IEquatable<ULogMultiInformationMessageToken>
 {
     #region Static
 
@@ -45,5 +45,25 @@ public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase
     public override int GetByteSize()
     {
         return base.GetByteSize() + sizeof(byte) /* IsContinued */;
+    }
+
+    public bool Equals(ULogMultiInformationMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return base.Equals(other) && IsContinued == other.IsContinued;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogMultiInformationMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), IsContinued);
     }
 }

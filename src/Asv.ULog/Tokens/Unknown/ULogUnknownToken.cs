@@ -1,6 +1,6 @@
 namespace Asv.ULog;
 
-public class ULogUnknownToken : IULogToken
+public class ULogUnknownToken : IULogToken, IEquatable<ULogUnknownToken>
 {
     #region Static
 
@@ -52,5 +52,26 @@ public class ULogUnknownToken : IULogToken
     public int GetByteSize()
     {
         return _byteSize;
+    }
+
+    public bool Equals(ULogUnknownToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return _byteSize == other._byteSize && UnknownType == other.UnknownType && 
+               UnknownTypeChar == other.UnknownTypeChar && Data.Equals(other.Data);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogUnknownToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(_byteSize, UnknownType, UnknownTypeChar, Data);
     }
 }

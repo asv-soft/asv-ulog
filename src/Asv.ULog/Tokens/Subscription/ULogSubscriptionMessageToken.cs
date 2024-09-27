@@ -9,7 +9,7 @@ namespace Asv.ULog;
 /// Subscribe a message by name and give it an id that is used in Logged data Message.
 /// This must come before the first corresponding Logged data Message.
 /// </summary>
-public class ULogSubscriptionMessageToken : IULogToken
+public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscriptionMessageToken>
 {
     public static ULogToken Type = ULogToken.Subscription;
     public const string Name = "Subscription";
@@ -76,5 +76,25 @@ public class ULogSubscriptionMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(byte) + sizeof(ushort) + ULog.Encoding.GetByteCount(MessageName);
+    }
+
+    public bool Equals(ULogSubscriptionMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return MessageName == other.MessageName && MultiId == other.MultiId && MessageId == other.MessageId;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogSubscriptionMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MessageName, MultiId, MessageId);
     }
 }

@@ -7,7 +7,7 @@ namespace Asv.ULog;
 ///
 /// The default parameter message defines the default value of a parameter for a given vehicle and setup.
 /// </summary>
-public class ULogDefaultParameterMessageToken : ULogParameterMessageToken
+public class ULogDefaultParameterMessageToken : ULogParameterMessageToken, IEquatable<ULogDefaultParameterMessageToken>
 {
     public static ULogToken Token => ULogToken.DefaultParameter;
     public new const string Name = "Default Parameter";
@@ -61,6 +61,26 @@ public class ULogDefaultParameterMessageToken : ULogParameterMessageToken
         if (defaultType != ULogParameterDefaultTypes.None) return;
 
         throw new ULogException("Default parameter type is None");
+    }
+
+    public bool Equals(ULogDefaultParameterMessageToken? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return base.Equals(other) && DefaultType == other.DefaultType;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ULogDefaultParameterMessageToken)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(base.GetHashCode(), (int)DefaultType);
     }
 }
 
