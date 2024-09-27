@@ -25,7 +25,7 @@ public class Program
                 .WithExample("ulog_messages", "file.ulg");
 
             config.AddCommand<UlogParams>("ulog_params")
-                .WithDescription("Extract parameters from a ULog file")
+                .WithDescription("Display parameters from a ULog file")
                 .WithExample("ulog_params", "file.ulg");
         });
 
