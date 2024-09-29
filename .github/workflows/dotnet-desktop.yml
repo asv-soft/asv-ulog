@@ -35,7 +35,7 @@ jobs:
       - name: Build projects
         run: |
           cd src
-          dotnet build -c Release --no-restore -p:ProductVersion=${{ steps.version.outputs.version-without-v }}
+          dotnet build -c Release --no-restore
 
       - name: Set version variable
         env:
@@ -55,8 +55,10 @@ jobs:
             exit 1
           fi
 
-      - name: Pack package
-        run: dotnet pack ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj -c Release /p:Version=${VERSION} --no-build -o .
+      - name: Pack project
+        run: |
+          cd src
+          dotnet pack -c Release --no-build --no-restore -p:PackageVersion=${VERSION} -o .
 
       - name: List output files
         run: ls -la

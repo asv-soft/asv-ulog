@@ -36,8 +36,8 @@ jobs:
       - name: Build projects
         run: |
           cd src
-          dotnet build -c Release --no-restore -p:ProductVersion=${{ steps.version.outputs.version-without-v }}
-
+          dotnet build -c Release --no-restore
+        
       - name: Set version variable
         env:
           TAG: ${{ github.ref_name }}
