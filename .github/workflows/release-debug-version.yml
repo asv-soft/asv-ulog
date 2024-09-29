@@ -59,3 +59,5 @@ jobs:
           cd src
           dotnet pack -c Release --no-build --no-restore -p:PackageVersion=${{ steps.version.outputs.version-without-v }} --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
 
+      - name: Push package to GitHub
+        run: dotnet nuget push ${{env.PROJECT_NAME}}.${VERSION}.nupkg --api-key ${{ secrets.GIHUB_NUGET_AUTH_TOKEN }} --skip-duplicate --source ${{ env.GITHUB_PACKAGES_URL }}
