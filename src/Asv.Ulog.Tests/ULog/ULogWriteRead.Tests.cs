@@ -974,7 +974,7 @@ public class ULogWriteReadTests
             {
                 MessageId = 999
             };
-            if (readToken?.TokenType == ULogToken.LoggedData) Assert.NotEqual(fakeToken, readToken);
+            if (readToken?.TokenType == ULogToken.Unsubscription) Assert.NotEqual(fakeToken, readToken);
         }
     }
     
