@@ -59,7 +59,7 @@ jobs:
       - name: Pack project
         run: |
           cd src
-          dotnet pack -c Release --no-build --no-restore -p:PackageVersion=${{ version }} -o .
+          dotnet pack -c Release --no-build --no-restore -p:PackageVersion=${VERSION} -o .
 
       - name: List output files
         run: ls -la
