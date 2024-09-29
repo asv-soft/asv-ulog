@@ -46,7 +46,6 @@ jobs:
       - name: Read version from Directory.Build.props
         id: read-version
         run: |
-          cd src
           version=$(grep -oP '<${{env.PROPS_VERSION_VAR_NAME}}>\K[^<]+' ./Directory.Build.props)
           echo "PropsVersion=${version}" >> $GITHUB_ENV
 
