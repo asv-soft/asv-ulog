@@ -51,10 +51,8 @@ jobs:
             exit 1
           fi
 
-      - name: Pack project
-        run: |
-          cd src
-          dotnet pack -c Release --no-build --no-restore -p:PackageVersion=${VERSION} -o .
+      - name: Pack package
+        run: dotnet pack ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj -c Release /p:Version=${VERSION} --no-build -o .
 
       - name: List output files
         run: ls -la
