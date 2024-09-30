@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asv.ULog", "Asv.ULog\Asv.UL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asv.ULog.Shell", "Asv.ULog.Shell\Asv.ULog.Shell.csproj", "{864F4BA9-F79E-4673-9CA6-1C2B0DC7E1A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asv.Ulog.Tests", "Asv.Ulog.Tests\Asv.Ulog.Tests.csproj", "{4C3EB02F-5BC7-4275-873B-0094C45C56DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asv.ULog.Tests", "Asv.ULog.Tests\Asv.ULog.Tests.csproj", "{4C3EB02F-5BC7-4275-873B-0094C45C56DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7329395A-C9F8-4DBD-93C2-D412E4448209}"
 	ProjectSection(SolutionItems) = preProject

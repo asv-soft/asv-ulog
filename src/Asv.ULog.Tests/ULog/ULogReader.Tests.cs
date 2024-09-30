@@ -1,8 +1,15 @@
 using System.Buffers;
-using Asv.ULog;
+using Asv.IO;
+using Asv.Ulog.Tests;
+using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
+using ULogFileHeaderToken = Asv.ULog.ULogFileHeaderToken;
+using ULogFlagBitsMessageToken = Asv.ULog.ULogFlagBitsMessageToken;
+using ULogLoggedDataMessageToken = Asv.ULog.ULogLoggedDataMessageToken;
+using ULogSynchronizationMessageToken = Asv.ULog.ULogSynchronizationMessageToken;
+using ULogToken = Asv.ULog.ULogToken;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 public class ULogReaderTests
 {
@@ -19,7 +26,7 @@ public class ULogReaderTests
         var bytes = TestData.ulog_sample;
         var data = new ReadOnlySequence<byte>(bytes);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.ULog.CreateReader();
+        var reader = ULog.CreateReader();
         int index = 0;
         var stat = Enum.GetValues<ULogToken>().ToDictionary(token => token, token => 0);
         while (reader.TryRead(ref rdr, out var token))
@@ -34,12 +41,12 @@ public class ULogReaderTests
             _output.WriteLine($"{key} : {value}");
         }
     }
-    
+
     [Fact]
     public void TryRead_HasCorruptedBytes_Success() // TODO: find out why reader doesn't read all tokens
     {
         var bytes = TestData.ulog_sample;
-        var wrongBytesCount = 199;
+        const int wrongBytesCount = 199;
         var random = new Random(4);
         var wrongBytes = new byte[wrongBytesCount];
         random.NextBytes(wrongBytes);
@@ -54,7 +61,7 @@ public class ULogReaderTests
         
         var data = new ReadOnlySequence<byte>(bytesBig);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.ULog.CreateReader();
+        var reader = ULog.CreateReader();
         int index = 0;
         var stat = Enum.GetValues<ULogToken>().ToDictionary(token => token, token => 0);
         while (reader.TryRead(ref rdr, out var token))
@@ -79,7 +86,7 @@ public class ULogReaderTests
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data);
-        var reader = ULog.ULog.CreateReader();
+        var reader = ULog.CreateReader();
 
         var result = reader.TryRead<ULogFileHeaderToken>(ref rdr, out var header);
         Assert.True(result);

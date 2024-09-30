@@ -1,6 +1,6 @@
 using Asv.ULog;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 public class ULogSubscriptionMessageTokenTests
 {
@@ -142,7 +142,7 @@ public class ULogSubscriptionMessageTokenTests
         }
 
         var messageIdBytes = BitConverter.GetBytes(messageId);
-        var messageNameBytes = ULog.ULog.Encoding.GetBytes(messageName);
+        var messageNameBytes = ULog.Encoding.GetBytes(messageName);
         var buffer = new Span<byte>(new byte[1 + 2 + messageNameBytes.Length]);
 
         buffer[0] = multiId;

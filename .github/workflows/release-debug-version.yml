@@ -40,14 +40,10 @@ jobs:
           dotnet nuget add source ${{ env.GITHUB_PACKAGES_URL }} --username '${{ secrets.USER_NAME }}' --password '${{ secrets.GIHUB_NUGET_AUTH_TOKEN }}' --store-password-in-clear-text
 
       - name: Restore dependencies
-        run: |
-          cd src
-          dotnet restore
+        run: dotnet restore ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj
 
-      - name: Build projects
-        run: |
-          cd src
-          dotnet build -c Release --no-restore -p:ProductVersion=${{ steps.version.outputs.version-without-v }}
+      - name: Build
+        run: dotnet build ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj --configuration Release --no-restore
 
       - name: Running all tests
         run:  |

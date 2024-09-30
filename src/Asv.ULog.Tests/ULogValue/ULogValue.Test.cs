@@ -1,9 +1,10 @@
 using System.Buffers;
 using System.Diagnostics;
 using Asv.ULog;
+using Asv.Ulog.Tests;
 using Xunit.Abstractions;
 
-namespace Asv.Ulog.Tests.ULogValue;
+namespace Asv.ULog.Tests.ULogValue;
 
 public class ULogValueTest(ITestOutputHelper output)
 {
@@ -14,7 +15,7 @@ public class ULogValueTest(ITestOutputHelper output)
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data);
-        var reader = ULog.ULog.CreateReader();
+        var reader = ULog.CreateReader();
         var format = new Dictionary<string, ULogFormatMessageToken>();
         var subscriptions = new Dictionary<ushort, ULogSubscriptionMessageToken>();
         var logged = new List<ULogLoggedDataMessageToken>();
@@ -57,7 +58,7 @@ public class ULogValueTest(ITestOutputHelper output)
         }
 
         var selectedItem = logged.Skip(3).First();
-        var value = ULog.ULog.Create(selectedItem, format, subscriptions, out var messageName);
+        var value = ULog.Create(selectedItem, format, subscriptions, out var messageName);
         foreach (var item in logged.Where(x=>x.MessageId == selectedItem.MessageId))
         {
             var span = new ReadOnlySpan<byte>(item.Data);
