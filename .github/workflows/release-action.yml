@@ -27,11 +27,14 @@ jobs:
       - name: Add NuGet source
         run: dotnet nuget add source ${{ env.GITHUB_PACKAGES_URL }} \--username '${{secrets.USER_NAME}}' \--password '${{secrets.GIHUB_NUGET_AUTH_TOKEN}}' \--store-password-in-clear-text
 
-      - name: Install dependencies
+      - name: Restore dependencies
         run: dotnet restore ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj
 
       - name: Build
         run: dotnet build ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj --configuration Release --no-restore
+        
+      - name: Running Tests
+        run: dotnet test ./src/${{env.PROJECT_NAME}}.Tests/${{env.PROJECT_NAME}}.Tests.csproj --no-restore --verbosity normal
 
       - name: Set version variable
         env:
