@@ -34,7 +34,7 @@ jobs:
         run: dotnet build ./src/${{env.PROJECT_NAME}}/${{env.PROJECT_NAME}}.csproj --configuration Release --no-restore
         
       - name: Running Tests
-        run: dotnet test ./src/${{env.PROJECT_NAME}}.Tests/${{env.PROJECT_NAME}}.Tests.csproj --no-restore --verbosity normal
+        run: dotnet test ./src/${{env.PROJECT_NAME}}.Tests/${{env.PROJECT_NAME}}.Tests.csproj --verbosity normal
 
       - name: Set version variable
         env:
