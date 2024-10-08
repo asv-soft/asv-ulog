@@ -1,6 +1,6 @@
 using Asv.ULog;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 public class ULogDefaultParameterMessageTokenTests
 {
@@ -228,7 +228,7 @@ public class ULogDefaultParameterMessageTokenTests
         var key = type + ULogTypeAndNameDefinition.TypeAndNameSeparator + name;
         var keyLength = kLength ?? (byte)key.Length;
         
-        var keyBytes = ULog.ULog.Encoding.GetBytes(key);
+        var keyBytes = ULog.Encoding.GetBytes(key);
 
         byte[] valueBytes = value switch
         {
@@ -238,7 +238,7 @@ public class ULogDefaultParameterMessageTokenTests
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        var buffer = new Span<byte>(new byte[2 + ULog.ULog.Encoding.GetByteCount(key) + valueBytes.Length]);
+        var buffer = new Span<byte>(new byte[2 + ULog.Encoding.GetByteCount(key) + valueBytes.Length]);
         buffer[0] = defaultType;
         buffer[1] = keyLength;
         

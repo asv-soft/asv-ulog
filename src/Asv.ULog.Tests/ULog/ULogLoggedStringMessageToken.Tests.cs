@@ -1,6 +1,6 @@
 using Asv.ULog;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 public class ULogLoggedStringMessageTokenTests
 {

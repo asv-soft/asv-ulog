@@ -4,9 +4,10 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using Asv.ULog;
 using Asv.ULog.Information;
+using Asv.Ulog.Tests;
 using Xunit.Abstractions;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 public class ULogWriteReadTests
 {
@@ -17,8 +18,8 @@ public class ULogWriteReadTests
     public ULogWriteReadTests(ITestOutputHelper output)
     {
         _output = output;
-        _reader = ULog.ULog.CreateReader();
-        _writer = ULog.ULog.CreateWriter();
+        _reader = ULog.CreateReader();
+        _writer = ULog.CreateWriter();
     }
 
     [Fact]
@@ -182,7 +183,7 @@ public class ULogWriteReadTests
         var bytes = TestData.ulog_with_px4_events;
         var data = new ReadOnlySequence<byte>(bytes);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.ULog.CreateReader();
+        var reader = ULog.CreateReader();
         var tokens = new List<IULogToken>();
         while (reader.TryRead(ref rdr, out var token))
         {
