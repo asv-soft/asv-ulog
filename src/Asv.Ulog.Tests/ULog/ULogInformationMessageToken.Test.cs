@@ -9,32 +9,31 @@ namespace Asv.Ulog.Tests;
 
 public class ULogInformationMessageTokenTests
 {
-    
     private readonly ITestOutputHelper _output;
 
     public ULogInformationMessageTokenTests(ITestOutputHelper output)
     {
         _output = output;
     }
-    
+
     [Fact]
     public void ReadHeaderWithParams()
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_log_small);
-        var rdr = new SequenceReader<byte>(data); 
+        var rdr = new SequenceReader<byte>(data);
         var reader = ULog.ULog.CreateReader();
         var result = reader.TryRead<ULogFileHeaderToken>(ref rdr, out var header);
         Assert.True(result);
         Assert.NotNull(header);
-        Assert.Equal(ULogToken.FileHeader,header.TokenType);
+        Assert.Equal(ULogToken.FileHeader, header.TokenType);
         Assert.Equal(20309082U, header.Timestamp);
-        Assert.Equal(1,header.Version);
+        Assert.Equal(1, header.Version);
         result = reader.TryRead<ULogFlagBitsMessageToken>(ref rdr, out var flag);
         Assert.True(result);
-        Assert.NotNull(flag);  
-        Assert.Equal(ULogToken.FlagBits,flag.TokenType);
+        Assert.NotNull(flag);
+        Assert.Equal(ULogToken.FlagBits, flag.TokenType);
 
-        var paramsDict = new Dictionary<string, IList<(ULogType,byte[])>>();
+        var paramsDict = new Dictionary<string, IList<(ULogType, byte[])>>();
         while (reader.TryRead(ref rdr, out var token))
         {
             if (token.TokenType == ULogToken.Information)
@@ -43,15 +42,18 @@ public class ULogInformationMessageTokenTests
                 {
                     if (!paramsDict.ContainsKey(param.Key.Name))
                     {
-                        paramsDict[param.Key.Name] = new List<(ULogType,byte[])> { new (param.Key.Type.BaseType,param.Value) }; 
+                        paramsDict[param.Key.Name] = new List<(ULogType, byte[])>
+                        {
+                            new(param.Key.Type.BaseType, param.Value),
+                        };
                         continue;
                     }
 
-                    paramsDict[param.Key.Name].Add(new (param.Key.Type.BaseType,param.Value));
+                    paramsDict[param.Key.Name].Add(new(param.Key.Type.BaseType, param.Value));
                 }
             }
         }
-        
+
         Assert.NotNull(paramsDict);
         Assert.NotEmpty(paramsDict);
 
@@ -60,13 +62,14 @@ public class ULogInformationMessageTokenTests
             var sb = new StringBuilder();
             foreach (var v in param.Value)
             {
-                sb.Append(ValueToString(v.Item1,v.Item2));
+                sb.Append(ValueToString(v.Item1, v.Item2));
             }
 
             var str = sb.ToString();
-            _output.WriteLine($"{param.Key,-20} = {str}");    
+            _output.WriteLine($"{param.Key, -20} = {str}");
         }
     }
+
     private string ValueToString(ULogType type, byte[] value)
     {
         switch (type)
@@ -75,7 +78,7 @@ public class ULogInformationMessageTokenTests
             case ULogType.Int32:
                 return BitConverter.ToInt32(value).ToString(CultureInfo.InvariantCulture);
             case ULogType.Char:
-                 return CharToString(value).ToString();
+                return CharToString(value).ToString();
             default:
                 throw new ArgumentNullException("Wrong ulog value type for InformationTokenValue");
         }
@@ -85,12 +88,11 @@ public class ULogInformationMessageTokenTests
     {
         var charSize = ULog.ULog.Encoding.GetCharCount(value);
         var charBuffer = new char[charSize];
-        ULog.ULog.Encoding.GetChars(value,charBuffer);
+        ULog.ULog.Encoding.GetChars(value, charBuffer);
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
-
     }
-    
+
     # region Deserialize
     [Theory]
     [InlineData(ULogTypeDefinition.UInt32TypeName, "data", 24U)]
@@ -148,7 +150,7 @@ public class ULogInformationMessageTokenTests
             token.Deserialize(ref readOnlySpan);
         });
     }
-    
+
     [Theory]
     [InlineData(null, "data", 'd')]
     [InlineData(null, "data", 1234)]
@@ -163,7 +165,11 @@ public class ULogInformationMessageTokenTests
         });
     }
 
-    private ReadOnlySpan<byte> SetUpTestDataWithoutKeyLength(string type, string name, ValueType value)
+    private ReadOnlySpan<byte> SetUpTestDataWithoutKeyLength(
+        string type,
+        string name,
+        ValueType value
+    )
     {
         var key = type + ULogTypeAndNameDefinition.TypeAndNameSeparator + name;
         var keyLength = (byte)key.Length;
@@ -175,10 +181,12 @@ public class ULogInformationMessageTokenTests
             char charValue => BitConverter.GetBytes(charValue),
             Int32 int32Value => BitConverter.GetBytes(int32Value),
             UInt32 uint32Value => BitConverter.GetBytes(uint32Value),
-            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 
-        var buffer = new Span<byte>(new byte[1 + ULog.ULog.Encoding.GetByteCount(key) + valueBytes.Length]);
+        var buffer = new Span<byte>(
+            new byte[1 + ULog.ULog.Encoding.GetByteCount(key) + valueBytes.Length]
+        );
 
         for (var i = 0; i < keyBytes.Length; i++)
         {
@@ -198,7 +206,12 @@ public class ULogInformationMessageTokenTests
 
     # endregion
 
-    private ReadOnlySpan<byte> SetUpTestData(string type, string name, object value, byte? kLength = null)
+    private ReadOnlySpan<byte> SetUpTestData(
+        string type,
+        string name,
+        object value,
+        byte? kLength = null
+    )
     {
         var key = type + ULogTypeAndNameDefinition.TypeAndNameSeparator + name;
         var keyLength = kLength ?? (byte)key.Length;
@@ -210,10 +223,12 @@ public class ULogInformationMessageTokenTests
             char charValue => BitConverter.GetBytes(charValue),
             Int32 int32Value => BitConverter.GetBytes(int32Value),
             UInt32 uint32Value => BitConverter.GetBytes(uint32Value),
-            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 
-        var buffer = new Span<byte>(new byte[1 + ULog.ULog.Encoding.GetByteCount(key) + valueBytes.Length]);
+        var buffer = new Span<byte>(
+            new byte[1 + ULog.ULog.Encoding.GetByteCount(key) + valueBytes.Length]
+        );
         buffer[0] = keyLength;
 
         for (var i = 0; i < keyBytes.Length; i++)
@@ -231,6 +246,4 @@ public class ULogInformationMessageTokenTests
 
         return readOnlySpan;
     }
-
-    
 }

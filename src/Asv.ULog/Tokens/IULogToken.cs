@@ -11,7 +11,7 @@ public interface IULogToken : ISizedSpanSerializable
 
 /// <summary>
 /// ULog files have the following three sections:
-/// 
+///
 /// ----------------------
 /// |       Header       |
 /// ----------------------
@@ -43,5 +43,5 @@ public enum TokenPlaceFlags
     /// <summary>
     /// Token can be placed in header and definition sections
     /// </summary>
-    DefinitionAndData = Definition | Data
+    DefinitionAndData = Definition | Data,
 }

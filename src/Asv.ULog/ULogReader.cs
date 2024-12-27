@@ -22,7 +22,7 @@ public enum ULogToken
     LoggedString,
     Synchronization,
     TaggedLoggedString,
-    Dropout
+    Dropout,
 }
 
 public interface IULogReader
@@ -52,38 +52,60 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         {
             case ReaderState.HeaderSection:
                 // always start with header
-                if (!InternalReadHeader(ref rdr, ref token)) return false;
+                if (!InternalReadHeader(ref rdr, ref token))
+                {
+                    return false;
+                }
+
                 _state = ReaderState.FlagBitsMessage;
                 return true;
             case ReaderState.FlagBitsMessage:
                 // must be right after header
-                if (!InternalReadToken(ref rdr, ref token)) return false;
+                if (!InternalReadToken(ref rdr, ref token))
+                {
+                    return false;
+                }
+
                 Debug.Assert(token != null);
                 if (token.TokenType != ULogToken.FlagBits)
                 {
                     // (https://docs.px4.io/main/en/dev_log/ulog_file_format.html#d-logged-data-message)
                     throw new ULogException(
-                        $"{ULogToken.FlagBits:G} must be right after {ReaderState.HeaderSection:G}, but got {token.TokenType:G}");
+                        $"{ULogToken.FlagBits:G} must be right after {ReaderState.HeaderSection:G}, but got {token.TokenType:G}"
+                    );
                 }
 
                 _state = ReaderState.DefinitionSection;
                 break;
             case ReaderState.DefinitionSection:
                 // definition section doesn't have Token Synchronization message
-                if (!InternalReadToken(ref rdr, ref token)) return false;
+                if (!InternalReadToken(ref rdr, ref token))
+                {
+                    return false;
+                }
+
                 Debug.Assert(token != null);
+
                 // if we read all definition tokens, then we can switch to data section
-                if (token.TokenSection.HasFlag(TokenPlaceFlags.Data) && !token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+                if (
+                    token.TokenSection.HasFlag(TokenPlaceFlags.Data)
+                    && !token.TokenSection.HasFlag(TokenPlaceFlags.Definition)
+                )
                 {
                     _state = ReaderState.DataSection;
                 }
+
                 break;
             case ReaderState.DataSection:
                 // data section can have Token Synchronization message
                 // if token we couldn't read token (exception occured), then it's corrupted data and we need to find sync message
                 try
                 {
-                    if (!InternalReadToken(ref rdr, ref token)) return false;
+                    if (!InternalReadToken(ref rdr, ref token))
+                    {
+                        return false;
+                    }
+
                     Debug.Assert(token is not null);
                     if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
                     {
@@ -99,6 +121,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 break;
             case ReaderState.Corrupted:
                 corrupted:
+
                 // TODO: try to find sync message and switch to DataSection
                 throw new Exception("Corrupted ULog file. Sync message not implemented.");
                 break;
@@ -112,7 +135,11 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
 
     private bool InternalReadToken(ref SequenceReader<byte> rdr, ref IULogToken? token)
     {
-        if (rdr.TryReadLittleEndian(out ushort size) == false) return false;
+        if (rdr.TryReadLittleEndian(out ushort size) == false)
+        {
+            return false;
+        }
+
         if (rdr.TryRead(out var type) == false)
         {
             rdr.Rewind(sizeof(ushort)); // rewind size
@@ -122,8 +149,14 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         var payloadBuffer = ArrayPool<byte>.Shared.Rent(size);
         try
         {
-            if (rdr.TryCopyTo(new Span<byte>(payloadBuffer, 0, size)) == false) return false;
-            token = factory.TryGetValue(type, out var tokenFactory) ? tokenFactory() : new ULogUnknownToken(type, size);
+            if (rdr.TryCopyTo(new Span<byte>(payloadBuffer, 0, size)) == false)
+            {
+                return false;
+            }
+
+            token = factory.TryGetValue(type, out var tokenFactory)
+                ? tokenFactory()
+                : new ULogUnknownToken(type, size);
             var readSpan = new ReadOnlySpan<byte>(payloadBuffer, 0, size);
             token.Deserialize(ref readSpan);
             rdr.Advance(size); // advance only if token was read successfully
@@ -141,7 +174,14 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         var headerBuffer = ArrayPool<byte>.Shared.Rent(ULogFileHeaderToken.HeaderSize);
         try
         {
-            if (rdr.TryCopyTo(new Span<byte>(headerBuffer, 0, ULogFileHeaderToken.HeaderSize)) == false) return false;
+            if (
+                rdr.TryCopyTo(new Span<byte>(headerBuffer, 0, ULogFileHeaderToken.HeaderSize))
+                == false
+            )
+            {
+                return false;
+            }
+
             rdr.Advance(ULogFileHeaderToken.HeaderSize);
             var span = new ReadOnlySpan<byte>(headerBuffer, 0, ULogFileHeaderToken.HeaderSize);
             token = new ULogFileHeaderToken();
@@ -160,7 +200,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         FlagBitsMessage,
         DataSection,
         Corrupted,
-        DefinitionSection
+        DefinitionSection,
     }
 
     public IULogToken? CurrentToken { get; private set; }

@@ -15,17 +15,18 @@ public class ULogDefaultParameterMessageToken : ULogParameterMessageToken
 
     public override string TokenName => Name;
     public override ULogToken TokenType => Token;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override TokenPlaceFlags TokenSection =>
+        TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
 
     private ULogParameterDefaultTypes _defaultTypes;
 
     /// <summary>
     /// default_types is a bitfield and defines to which group(s) the value belongs to.
-    /// 
+    ///
     /// At least one bit must be set:
     ///     1&lt;&lt;0: system-wide default
     ///     1&lt;&lt;1: default for the current configuration (e.g. an airframe)
-    /// 
+    ///
     /// A log may not contain default values for all parameters.
     /// In those cases the default is equal to the parameter value, and different default types are treated independently.
     /// </summary>
@@ -58,7 +59,10 @@ public class ULogDefaultParameterMessageToken : ULogParameterMessageToken
 
     private void CheckDefaultType(ULogParameterDefaultTypes defaultType)
     {
-        if (defaultType != ULogParameterDefaultTypes.None) return;
+        if (defaultType != ULogParameterDefaultTypes.None)
+        {
+            return;
+        }
 
         throw new ULogException("Default parameter type is None");
     }
@@ -69,5 +73,5 @@ public enum ULogParameterDefaultTypes : byte
 {
     None = 0,
     SystemWide = 1 << 0,
-    ForCurrentConfiguration = 1 << 1
+    ForCurrentConfiguration = 1 << 1,
 }

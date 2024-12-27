@@ -60,9 +60,9 @@ public class ULogTaggedLoggedStringMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(ULogLevel) /*LogLevel*/
-               + sizeof(ushort) /*Tag*/
-               + sizeof(ulong) /*Timestamp*/
-               + ULog.Encoding.GetByteCount(Message);
+            + sizeof(ushort) /*Tag*/
+            + sizeof(ulong) /*Timestamp*/
+            + ULog.Encoding.GetByteCount(Message);
     }
 
     public enum ULogLevel : byte
@@ -105,6 +105,6 @@ public class ULogTaggedLoggedStringMessageToken : IULogToken
         /// <summary>
         /// Debug-level messages
         /// </summary>
-        Debug = 7
+        Debug = 7,
     }
 }

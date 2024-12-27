@@ -17,7 +17,7 @@ public enum ULogType
     Double,
     Bool,
     Char,
-    ReferenceType
+    ReferenceType,
 }
 
 /// <summary>
@@ -84,16 +84,24 @@ public class ULogTypeDefinition : ISizedSpanSerializable
     public void Deserialize(ReadOnlySpan<char> buffer)
     {
         _arraySize = 0;
+
         // Trim any leading or trailing whitespace
         buffer = buffer.Trim();
+
         // Check for array format (e.g., float[5])
         var openBracketIndex = buffer.IndexOf(ArrayStart);
         var closeBracketIndex = buffer.IndexOf(ArrayEnd);
         if (openBracketIndex != -1 && closeBracketIndex != -1)
         {
             // Parse array size
-            var arraySizeSpan = buffer.Slice(openBracketIndex + 1, closeBracketIndex - openBracketIndex - 1);
-            if (!int.TryParse(arraySizeSpan, out _arraySize)) throw new FormatException("Invalid array size format.");
+            var arraySizeSpan = buffer.Slice(
+                openBracketIndex + 1,
+                closeBracketIndex - openBracketIndex - 1
+            );
+            if (!int.TryParse(arraySizeSpan, out _arraySize))
+            {
+                throw new FormatException("Invalid array size format.");
+            }
 
             // Extract the type name without the array size
             _typeName = buffer[..openBracketIndex].Trim().ToString();
@@ -119,7 +127,7 @@ public class ULogTypeDefinition : ISizedSpanSerializable
             DoubleTypeName => ULogType.Double,
             BoolTypeName => ULogType.Bool,
             CharTypeName => ULogType.Char,
-            _ => ULogType.ReferenceType
+            _ => ULogType.ReferenceType,
         };
     }
 
@@ -160,8 +168,10 @@ public class ULogTypeDefinition : ISizedSpanSerializable
     public int GetByteSize()
     {
         return IsArray
-            ? ULog.Encoding.GetByteCount(_typeName) +
-              ArrayStartByteSize + ULog.Encoding.GetByteCount(_arraySize.ToString()) + ArrayEndByteSize
+            ? ULog.Encoding.GetByteCount(_typeName)
+                + ArrayStartByteSize
+                + ULog.Encoding.GetByteCount(_arraySize.ToString())
+                + ArrayEndByteSize
             : ULog.Encoding.GetByteCount(_typeName);
     }
 }

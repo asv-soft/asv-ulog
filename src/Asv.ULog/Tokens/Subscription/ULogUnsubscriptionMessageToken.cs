@@ -38,6 +38,7 @@ public class ULogUnsubscriptionMessageToken : IULogToken
 
     public int GetByteSize()
     {
-        return sizeof(ushort) /*MessageId*/;
+        return sizeof(ushort) /*MessageId*/
+        ;
     }
 }

@@ -21,18 +21,22 @@ public static class SequenceReaderExtensions
     /// True if successful. <paramref name="value"/> will be default if failed (due to lack of space).
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe bool TryRead<T>(ref this SequenceReader<byte> reader, out T value) where T : unmanaged
+    private static unsafe bool TryRead<T>(ref this SequenceReader<byte> reader, out T value)
+        where T : unmanaged
     {
         var span = reader.UnreadSpan;
         if (span.Length < sizeof(T))
+        {
             return TryReadMultisegment(ref reader, out value);
+        }
 
         value = Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(span));
         reader.Advance(sizeof(T));
         return true;
     }
 
-    private static unsafe bool TryReadMultisegment<T>(ref SequenceReader<byte> reader, out T value) where T : unmanaged
+    private static unsafe bool TryReadMultisegment<T>(ref SequenceReader<byte> reader, out T value)
+        where T : unmanaged
     {
         Debug.Assert(reader.UnreadSpan.Length < sizeof(T));
 
@@ -57,7 +61,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="short"/>.</returns>
     public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out ushort value)
     {
-        if (BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }
@@ -68,7 +75,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="short"/>.</returns>
     public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out ushort value)
     {
-        if (!BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (!BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }
@@ -90,7 +100,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="int"/>.</returns>
     public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out uint value)
     {
-        if (BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }
@@ -101,7 +114,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="int"/>.</returns>
     public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out uint value)
     {
-        if (!BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (!BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }
@@ -123,7 +139,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="long"/>.</returns>
     public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out ulong value)
     {
-        if (BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }
@@ -134,7 +153,10 @@ public static class SequenceReaderExtensions
     /// <returns>False if there wasn't enough data for an <see cref="long"/>.</returns>
     public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out ulong value)
     {
-        if (!BitConverter.IsLittleEndian) return reader.TryRead(out value);
+        if (!BitConverter.IsLittleEndian)
+        {
+            return reader.TryRead(out value);
+        }
 
         return TryReadReverseEndianness(ref reader, out value);
     }

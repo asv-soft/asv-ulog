@@ -18,5 +18,6 @@ public class ULogInformationMessageToken : ULogKeyAndValueTokenBase
 
     public override string TokenName => Name;
     public override ULogToken TokenType => Type;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override TokenPlaceFlags TokenSection =>
+        TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
 }

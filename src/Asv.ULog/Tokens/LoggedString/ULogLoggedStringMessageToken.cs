@@ -4,7 +4,7 @@ namespace Asv.ULog;
 
 /// <summary>
 /// 'L': Logged String Message
-/// 
+///
 /// Logged string message, i.e. printf() output.
 /// </summary>
 public class ULogLoggedStringMessageToken : IULogToken
@@ -46,7 +46,6 @@ public class ULogLoggedStringMessageToken : IULogToken
         }
     }
 
-
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         var level = BinSerialize.ReadByte(ref buffer);
@@ -70,8 +69,8 @@ public class ULogLoggedStringMessageToken : IULogToken
     public int GetByteSize()
     {
         return sizeof(byte) /*LogLevel*/
-               + sizeof(ulong) /*Timestamp*/
-               + ULog.Encoding.GetByteCount(Message);
+            + sizeof(ulong) /*Timestamp*/
+            + ULog.Encoding.GetByteCount(Message);
     }
 
     public enum ULogLevel
@@ -114,6 +113,6 @@ public class ULogLoggedStringMessageToken : IULogToken
         /// <summary>
         /// Debug-level messages
         /// </summary>
-        Debug = '7'
+        Debug = '7',
     }
 }

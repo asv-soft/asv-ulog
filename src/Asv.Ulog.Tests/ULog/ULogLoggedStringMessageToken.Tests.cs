@@ -10,7 +10,11 @@ public class ULogLoggedStringMessageTokenTests
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Emerg, 12345678UL, "Test message")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Debug, 987654321UL, "Another test")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Info, 1234567890UL, "Debug info")]
-    public void DeserializeToken_Success(ULogLoggedStringMessageToken.ULogLevel logLevel, ulong timestamp, string message)
+    public void DeserializeToken_Success(
+        ULogLoggedStringMessageToken.ULogLevel logLevel,
+        ulong timestamp,
+        string message
+    )
     {
         // Arrange
         var readOnlySpan = SetUpTestData(logLevel, timestamp, message);
@@ -33,7 +37,11 @@ public class ULogLoggedStringMessageTokenTests
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Emerg, 12345678UL, "Test message")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Debug, 987654321UL, "Another test")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Info, 1234567890UL, "Debug info")]
-    public void SerializeToken_Success(ULogLoggedStringMessageToken.ULogLevel logLevel, ulong timestamp, string message)
+    public void SerializeToken_Success(
+        ULogLoggedStringMessageToken.ULogLevel logLevel,
+        ulong timestamp,
+        string message
+    )
     {
         // Arrange
         var readOnlySpan = SetUpTestData(logLevel, timestamp, message);
@@ -56,7 +64,11 @@ public class ULogLoggedStringMessageTokenTests
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Emerg, 12345678UL, "Test message")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Debug, 987654321UL, "Another test")]
     [InlineData(ULogLoggedStringMessageToken.ULogLevel.Info, 1234567890UL, "Debug info")]
-    public void GetByteSize_Success(ULogLoggedStringMessageToken.ULogLevel logLevel, ulong timestamp, string message)
+    public void GetByteSize_Success(
+        ULogLoggedStringMessageToken.ULogLevel logLevel,
+        ulong timestamp,
+        string message
+    )
     {
         // Arrange
         var setup = SetUpTestData(logLevel, timestamp, message);
@@ -73,29 +85,37 @@ public class ULogLoggedStringMessageTokenTests
 
     #region Setup
 
-    private static ULogLoggedStringMessageToken SetUpTestToken(ULogLoggedStringMessageToken.ULogLevel logLevel, ulong timestamp, string message)
+    private static ULogLoggedStringMessageToken SetUpTestToken(
+        ULogLoggedStringMessageToken.ULogLevel logLevel,
+        ulong timestamp,
+        string message
+    )
     {
         return new ULogLoggedStringMessageToken
         {
             LogLevel = logLevel,
             TimeStamp = timestamp,
-            Message = message
+            Message = message,
         };
     }
 
-    private static ReadOnlySpan<byte> SetUpTestData(ULogLoggedStringMessageToken.ULogLevel logLevel, ulong timestamp, string message)
+    private static ReadOnlySpan<byte> SetUpTestData(
+        ULogLoggedStringMessageToken.ULogLevel logLevel,
+        ulong timestamp,
+        string message
+    )
     {
         var token = new ULogLoggedStringMessageToken
         {
             LogLevel = logLevel,
             TimeStamp = timestamp,
-            Message = message
+            Message = message,
         };
         var buffer = new Span<byte>(new byte[token.GetByteSize()]);
         var temp = buffer;
         token.Serialize(ref temp);
         return new ReadOnlySpan<byte>(buffer.ToArray());
     }
-    
+
     #endregion
 }

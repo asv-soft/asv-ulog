@@ -5,7 +5,7 @@ namespace Asv.Ulog.Tests;
 public class ULogSynchronizationMessageTokenTests
 {
     # region Deserialize
-    
+
     [Fact]
     public void DeserializeToken_Success()
     {
@@ -17,7 +17,7 @@ public class ULogSynchronizationMessageTokenTests
         // Act + Assert
         token.Deserialize(ref readOnlySpan);
     }
-    
+
     [Fact]
     public void DeserializeToken_WrongBytes()
     {
@@ -25,21 +25,21 @@ public class ULogSynchronizationMessageTokenTests
         {
             var data = new[]
             {
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[0] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[1] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[2] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[3] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[4] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[5] + 1), 
-                (byte)(ULogSynchronizationMessageToken.SyncMagic[6] + 1)
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[0] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[1] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[2] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[3] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[4] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[5] + 1),
+                (byte)(ULogSynchronizationMessageToken.SyncMagic[6] + 1),
             };
-            
+
             var readOnlySpan = new ReadOnlySpan<byte>(data);
             var token = new ULogSynchronizationMessageToken();
             token.Deserialize(ref readOnlySpan);
         });
     }
-    
+
     [Fact]
     public void DeserializeToken_LessBytes_Error()
     {
@@ -51,7 +51,7 @@ public class ULogSynchronizationMessageTokenTests
             token.Deserialize(ref readOnlySpan);
         });
     }
-    
+
     [Fact]
     public void DeserializeToken_MoreBytes_Error()
     {
@@ -73,45 +73,47 @@ public class ULogSynchronizationMessageTokenTests
     {
         // Arrange
         var token = SetUpTestToken();
-    
+
         // Act
         var span = new Span<byte>(new byte[ULogSynchronizationMessageToken.SyncMagic.Length]);
         var temp = span;
         token.Serialize(ref temp);
-    
+
         // Assert
         Assert.True(span.SequenceEqual(ULogSynchronizationMessageToken.SyncMagic));
     }
-    
+
     [Fact]
     public void SerializeToken_NotEnoughSpace()
     {
         Assert.Throws<IndexOutOfRangeException>(() =>
         {
             var token = SetUpTestToken();
-            var span = new Span<byte>(new byte[ULogSynchronizationMessageToken.SyncMagic.Length - 1]);
+            var span = new Span<byte>(
+                new byte[ULogSynchronizationMessageToken.SyncMagic.Length - 1]
+            );
             var temp = span;
             token.Serialize(ref temp);
         });
     }
-    
+
     # endregion
-    
+
     # region GetByteSize
-    
+
     [Fact]
     public void GetByteSize_Success()
     {
         // Arrange
         var token = SetUpTestToken();
-    
+
         // Act
         var size = token.GetByteSize();
-    
+
         // Assert
         Assert.Equal(ULogSynchronizationMessageToken.SyncMagic.Length, size);
     }
-    
+
     # endregion
 
     #region Setup

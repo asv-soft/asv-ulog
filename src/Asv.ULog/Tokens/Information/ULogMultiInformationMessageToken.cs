@@ -19,7 +19,8 @@ public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase
     private byte _isContinued;
     public override string TokenName => Name;
     public override ULogToken TokenType => Type;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override TokenPlaceFlags TokenSection =>
+        TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
 
     /// <summary>
     /// IsContinued can be used for split-up messages: if set to 1, it is part of the previous message with the same key.
@@ -44,6 +45,8 @@ public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase
 
     public override int GetByteSize()
     {
-        return base.GetByteSize() + sizeof(byte) /* IsContinued */;
+        return base.GetByteSize()
+            + sizeof(byte) /* IsContinued */
+        ;
     }
 }

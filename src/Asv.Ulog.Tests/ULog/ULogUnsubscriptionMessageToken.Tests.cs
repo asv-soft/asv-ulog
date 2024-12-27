@@ -73,10 +73,7 @@ public class ULogUnsubscriptionMessageTokenTests
 
     private ULogUnsubscriptionMessageToken SetUpTestToken(ushort msgId)
     {
-        var token = new ULogUnsubscriptionMessageToken
-        {
-            MessageId = msgId
-        };
+        var token = new ULogUnsubscriptionMessageToken { MessageId = msgId };
 
         return token;
     }

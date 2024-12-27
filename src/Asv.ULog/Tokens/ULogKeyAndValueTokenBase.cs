@@ -6,7 +6,7 @@ namespace Asv.ULog;
 /// Base class for ULog key-value tokens.
 ///
 /// e.g. Information, Parameter, etc.
-/// 
+///
 /// uint8_t key_len;
 /// char key[key_len];
 /// char value[header.msg_size-2-key_len]
@@ -25,7 +25,10 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken
 
     public virtual void Serialize(ref Span<byte> buffer)
     {
-        BinSerialize.WriteByte(ref buffer, (byte)(Key.Type.TypeName.Length + sizeof(byte) + Key.Name.Length));
+        BinSerialize.WriteByte(
+            ref buffer,
+            (byte)(Key.Type.TypeName.Length + sizeof(byte) + Key.Name.Length)
+        );
         Key.Serialize(ref buffer);
         Value.CopyTo(buffer);
         buffer = buffer[Value.Length..];

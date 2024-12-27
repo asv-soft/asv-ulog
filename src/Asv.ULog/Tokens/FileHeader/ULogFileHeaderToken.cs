@@ -29,7 +29,6 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
     private byte _version;
     private ulong _timestamp;
 
-
     /// <summary>
     /// File format version
     /// </summary>
@@ -63,9 +62,7 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
                 return false;
             }
 
-            if (b != FileMagic[i])
-            {
-            }
+            if (b != FileMagic[i]) { }
         }
 
         if (rdr.TryRead(out _version) == false)
@@ -83,13 +80,13 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
         return true;
     }
 
-
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         for (var i = 0; i < FileMagic.Length; i++)
             if (buffer[i] != FileMagic[i])
                 throw new ULogException(
-                    $"Error to parse ULog header: FileMagic[{i}] want{FileMagic[i]}. Got {buffer[i]}");
+                    $"Error to parse ULog header: FileMagic[{i}] want{FileMagic[i]}. Got {buffer[i]}"
+                );
         buffer = buffer[FileMagic.Length..];
         BinSerialize.ReadByte(ref buffer, ref _version);
         BinSerialize.ReadULong(ref buffer, ref _timestamp);
@@ -97,7 +94,11 @@ public class ULogFileHeaderToken : IULogToken, ISizedSpanSerializable
 
     public void Serialize(ref Span<byte> buffer)
     {
-        for (var i = 0; i < FileMagic.Length; i++) buffer[i] = FileMagic[i];
+        for (var i = 0; i < FileMagic.Length; i++)
+        {
+            buffer[i] = FileMagic[i];
+        }
+
         buffer = buffer[FileMagic.Length..];
         BinSerialize.WriteByte(ref buffer, _version);
         BinSerialize.WriteULong(ref buffer, _timestamp);

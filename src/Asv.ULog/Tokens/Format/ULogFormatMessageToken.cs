@@ -27,10 +27,17 @@ public partial class ULogFormatMessageToken : IULogToken
 
     public static void CheckMessageName(ReadOnlySpan<char> value)
     {
-        if (value.IsEmpty) throw new ULogException("ULog message name is empty.");
+        if (value.IsEmpty)
+        {
+            throw new ULogException("ULog message name is empty.");
+        }
+
         if (MessageNameRegex.IsMatch(value) == false)
+        {
             throw new ULogException(
-                $"Invalid ULog message name. Should be {FixedMessageNamePattern}. Origin value: '{value.ToString()}'");
+                $"Invalid ULog message name. Should be {FixedMessageNamePattern}. Origin value: '{value.ToString()}'"
+            );
+        }
     }
 
     static ULogFormatMessageToken()
@@ -38,7 +45,9 @@ public partial class ULogFormatMessageToken : IULogToken
         var temp = FieldSeparator;
         FieldSeparatorByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
         temp = MessageAndFieldsSeparator;
-        MessageAndFieldsSeparatorByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        MessageAndFieldsSeparatorByteSize = ULog.Encoding.GetByteCount(
+            new ReadOnlySpan<char>(ref temp)
+        );
     }
 
     public static ULogToken Type => ULogToken.Format;
@@ -83,7 +92,8 @@ public partial class ULogFormatMessageToken : IULogToken
         var colonIndex = input.IndexOf(MessageAndFieldsSeparator);
         if (colonIndex == -1)
             throw new ULogException(
-                $"Invalid format message for token {Type:G}: '{MessageAndFieldsSeparator}' not found. Origin string: {input.ToString()}");
+                $"Invalid format message for token {Type:G}: '{MessageAndFieldsSeparator}' not found. Origin string: {input.ToString()}"
+            );
         var messageNameSpan = input[..colonIndex];
         MessageName = messageNameSpan.ToString();
         var fieldsSpan = input[(colonIndex + 1)..];
@@ -92,7 +102,8 @@ public partial class ULogFormatMessageToken : IULogToken
             var semicolonIndex = fieldsSpan.IndexOf(FieldSeparator);
             if (semicolonIndex == -1)
                 throw new ULogException(
-                    $"Invalid format message for token {Type:G}: '{FieldSeparator}' not found. Origin string: {fieldsSpan.ToString()}");
+                    $"Invalid format message for token {Type:G}: '{FieldSeparator}' not found. Origin string: {fieldsSpan.ToString()}"
+                );
 
             var field = fieldsSpan[..semicolonIndex];
             var newItem = new ULogTypeAndNameDefinition();
@@ -120,7 +131,8 @@ public partial class ULogFormatMessageToken : IULogToken
 
     public int GetByteSize()
     {
-        return ULog.Encoding.GetByteCount(MessageName) + MessageAndFieldsSeparatorByteSize +
-               Fields.Sum(x => x.GetByteSize() + FieldSeparatorByteSize);
+        return ULog.Encoding.GetByteCount(MessageName)
+            + MessageAndFieldsSeparatorByteSize
+            + Fields.Sum(x => x.GetByteSize() + FieldSeparatorByteSize);
     }
 }

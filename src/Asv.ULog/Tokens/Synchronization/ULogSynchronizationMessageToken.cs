@@ -2,7 +2,7 @@ namespace Asv.ULog;
 
 /// <summary>
 /// 'S': Synchronization message.
-/// 
+///
 /// Message so that a reader can recover from a corrupt message by searching for the next sync message.
 /// </summary>
 public class ULogSynchronizationMessageToken : IULogToken
@@ -27,16 +27,25 @@ public class ULogSynchronizationMessageToken : IULogToken
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         for (var i = 0; i < SyncMagic.Length; i++)
+        {
             if (buffer[i] != SyncMagic[i])
+            {
                 throw new ULogException(
-                    $"Error to parse Sync message: SyncMagic[{i}] want{SyncMagic[i]}. Got {buffer[i]}");
+                    $"Error to parse Sync message: SyncMagic[{i}] want{SyncMagic[i]}. Got {buffer[i]}"
+                );
+            }
+        }
 
         buffer = buffer[SyncMagic.Length..];
     }
 
     public void Serialize(ref Span<byte> buffer)
     {
-        for (var i = 0; i < SyncMagic.Length; i++) buffer[i] = SyncMagic[i];
+        for (var i = 0; i < SyncMagic.Length; i++)
+        {
+            buffer[i] = SyncMagic[i];
+        }
+
         buffer = buffer[SyncMagic.Length..];
     }
 

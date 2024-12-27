@@ -45,7 +45,11 @@ public class ULogSubscriptionMessageTokenTests
     [InlineData(1, 14, "%@#")]
     [InlineData(byte.MaxValue, ushort.MaxValue, "`!!!`````````")]
     [InlineData(byte.MinValue, ushort.MinValue, "")]
-    public void DeserializeToken_WrongMessageName(byte multiId, ushort messageId, string messageName)
+    public void DeserializeToken_WrongMessageName(
+        byte multiId,
+        ushort messageId,
+        string messageName
+    )
     {
         Assert.Throws<ULogException>(() =>
         {
@@ -123,13 +127,17 @@ public class ULogSubscriptionMessageTokenTests
 
     #region Setup
 
-    private ULogSubscriptionMessageToken SetUpTestToken(byte multiId, ushort messageId, string messageName)
+    private ULogSubscriptionMessageToken SetUpTestToken(
+        byte multiId,
+        ushort messageId,
+        string messageName
+    )
     {
         var token = new ULogSubscriptionMessageToken
         {
             MessageName = messageName,
             MessageId = messageId,
-            MultiId = multiId
+            MultiId = multiId,
         };
         return token;
     }

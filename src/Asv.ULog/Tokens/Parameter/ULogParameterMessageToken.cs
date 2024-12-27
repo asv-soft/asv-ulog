@@ -20,20 +20,25 @@ public class ULogParameterMessageToken : ULogKeyAndValueTokenBase
 
     public override string TokenName => Name;
     public override ULogToken TokenType => Type;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override TokenPlaceFlags TokenSection =>
+        TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
 
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         base.Deserialize(ref buffer);
         if (Key.Type.BaseType != ULogType.Float && Key.Type.BaseType != ULogType.Int32)
-            throw new ULogException($"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}");
+            throw new ULogException(
+                $"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}"
+            );
     }
 
     public override void Serialize(ref Span<byte> buffer)
     {
         ArgumentNullException.ThrowIfNull(Key);
         if (Key.Type.BaseType != ULogType.Float && Key.Type.BaseType != ULogType.Int32)
-            throw new ULogException($"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}");
+            throw new ULogException(
+                $"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}"
+            );
         base.Serialize(ref buffer);
     }
 
@@ -41,7 +46,9 @@ public class ULogParameterMessageToken : ULogKeyAndValueTokenBase
     {
         ArgumentNullException.ThrowIfNull(Key);
         if (Key.Type.BaseType != ULogType.Float && Key.Type.BaseType != ULogType.Int32)
-            throw new ULogException($"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}");
+            throw new ULogException(
+                $"Parameter message value type must be {ULogType.Float} or {ULogType.Int32}"
+            );
         return base.GetByteSize();
     }
 }

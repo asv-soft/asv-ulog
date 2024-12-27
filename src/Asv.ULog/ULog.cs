@@ -15,13 +15,28 @@ public static class ULog
         builder.Add(ULogFlagBitsMessageToken.TokenId, () => new ULogFlagBitsMessageToken());
         builder.Add(ULogFormatMessageToken.TokenId, () => new ULogFormatMessageToken());
         builder.Add(ULogParameterMessageToken.TokenId, () => new ULogParameterMessageToken());
-        builder.Add(ULogDefaultParameterMessageToken.TokenId, () => new ULogDefaultParameterMessageToken());
+        builder.Add(
+            ULogDefaultParameterMessageToken.TokenId,
+            () => new ULogDefaultParameterMessageToken()
+        );
         builder.Add(ULogInformationMessageToken.TokenId, () => new ULogInformationMessageToken());
-        builder.Add(ULogMultiInformationMessageToken.TokenId, () => new ULogMultiInformationMessageToken());
-        builder.Add(ULogUnsubscriptionMessageToken.TokenId, () => new ULogUnsubscriptionMessageToken());
+        builder.Add(
+            ULogMultiInformationMessageToken.TokenId,
+            () => new ULogMultiInformationMessageToken()
+        );
+        builder.Add(
+            ULogUnsubscriptionMessageToken.TokenId,
+            () => new ULogUnsubscriptionMessageToken()
+        );
         builder.Add(ULogLoggedStringMessageToken.TokenId, () => new ULogLoggedStringMessageToken());
-        builder.Add(ULogSynchronizationMessageToken.TokenId, () => new ULogSynchronizationMessageToken());
-        builder.Add(ULogTaggedLoggedStringMessageToken.TokenId, () => new ULogTaggedLoggedStringMessageToken());
+        builder.Add(
+            ULogSynchronizationMessageToken.TokenId,
+            () => new ULogSynchronizationMessageToken()
+        );
+        builder.Add(
+            ULogTaggedLoggedStringMessageToken.TokenId,
+            () => new ULogTaggedLoggedStringMessageToken()
+        );
         builder.Add(ULogSubscriptionMessageToken.TokenId, () => new ULogSubscriptionMessageToken());
         builder.Add(ULogDropoutMessageToken.TokenId, () => new ULogDropoutMessageToken());
         builder.Add(ULogLoggedDataMessageToken.TokenId, () => new ULogLoggedDataMessageToken());

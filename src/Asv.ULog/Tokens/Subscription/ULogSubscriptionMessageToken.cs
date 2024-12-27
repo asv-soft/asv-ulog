@@ -22,7 +22,7 @@ public class ULogSubscriptionMessageToken : IULogToken
 
     /// <summary>
     /// The same message format can have multiple instances, for example if the system has two sensors of the same type.
-    /// 
+    ///
     /// The default and first instance must be 0.
     /// </summary>
     public byte MultiId { get; set; }

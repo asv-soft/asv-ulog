@@ -3,7 +3,7 @@ using Asv.IO;
 namespace Asv.ULog;
 
 /// <summary>
-/// 'D': Logged Data Message 
+/// 'D': Logged Data Message
 /// </summary>
 public class ULogLoggedDataMessageToken : IULogToken
 {
@@ -21,7 +21,7 @@ public class ULogLoggedDataMessageToken : IULogToken
 
     /// <summary>
     /// msg_id: unique id to match Logged data Message data. The first use must set this to 0, then increase it.
-    /// 
+    ///
     /// The same msg_id must not be used twice for different subscriptions.
     /// </summary>
     public ushort MessageId { get; set; }
@@ -45,6 +45,8 @@ public class ULogLoggedDataMessageToken : IULogToken
 
     public int GetByteSize()
     {
-        return sizeof(ushort) /*msg_id*/ + Data.Length /*data*/;
+        return sizeof(ushort) /*msg_id*/
+            + Data.Length /*data*/
+        ;
     }
 }

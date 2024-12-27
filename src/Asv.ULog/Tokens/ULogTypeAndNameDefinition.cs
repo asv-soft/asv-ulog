@@ -23,16 +23,22 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable
 
     public static void CheckName(ReadOnlySpan<char> value)
     {
-        if (value.IsEmpty) throw new ULogException("ULog variable name is empty.");
-        if (NameRegex.IsMatch(value) == false)
+        if (value.IsEmpty)
+        {
+            throw new ULogException("ULog variable name is empty.");
+        }
+
+        if (!NameRegex.IsMatch(value))
+        {
             throw new ULogException(
-                $"Invalid ULog '{nameof(ULogTypeAndNameDefinition)}' definition. '{nameof(Name)}' should be {FixedNamePattern}. Origin value: '{value.ToString()}'");
+                $"Invalid ULog '{nameof(ULogTypeAndNameDefinition)}' definition. '{nameof(Name)}' should be {FixedNamePattern}. Origin value: '{value.ToString()}'"
+            );
+        }
     }
 
     public const char TypeAndNameSeparator = ' ';
     public static readonly int TypeAndNameSeparatorByteSize;
     private string _name = null!;
-
 
     static ULogTypeAndNameDefinition()
     {
@@ -63,8 +69,12 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable
     {
         var colonIndex = rawString.IndexOf(TypeAndNameSeparator);
         if (colonIndex == -1)
+        {
             throw new ULogException(
-                $"Invalid format field: '{TypeAndNameSeparator}' not found. Origin string: {rawString.ToString()}");
+                $"Invalid format field: '{TypeAndNameSeparator}' not found. Origin string: {rawString.ToString()}"
+            );
+        }
+
         var type = rawString[..colonIndex];
         Type = new ULogTypeDefinition();
         Type.Deserialize(type);
