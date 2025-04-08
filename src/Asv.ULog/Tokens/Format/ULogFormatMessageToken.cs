@@ -10,7 +10,7 @@ namespace Asv.ULog;
 ///
 /// Format message defines a single message name and its inner fields in a single string.
 /// </summary>
-public partial class ULogFormatMessageToken : IULogToken, IEquatable<ULogFormatMessageToken>
+public partial class ULogFormatMessageToken : IULogDefinitionToken, IEquatable<ULogFormatMessageToken>
 {
     #region Static
 
@@ -51,7 +51,7 @@ public partial class ULogFormatMessageToken : IULogToken, IEquatable<ULogFormatM
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition;
 
     private string _messageName = null!;
 

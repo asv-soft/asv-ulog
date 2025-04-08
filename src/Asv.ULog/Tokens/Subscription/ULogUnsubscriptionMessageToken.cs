@@ -7,7 +7,7 @@ namespace Asv.ULog;
 ///
 /// Unsubscribe a message, to mark that it will not be logged anymore (not used currently).
 /// </summary>
-public class ULogUnsubscriptionMessageToken : IULogToken, IEquatable<ULogUnsubscriptionMessageToken>
+public class ULogUnsubscriptionMessageToken : IULogDataToken, IEquatable<ULogUnsubscriptionMessageToken>
 {
     #region Static
 
@@ -19,7 +19,7 @@ public class ULogUnsubscriptionMessageToken : IULogToken, IEquatable<ULogUnsubsc
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
 
     /// <summary>
     /// ID of the message

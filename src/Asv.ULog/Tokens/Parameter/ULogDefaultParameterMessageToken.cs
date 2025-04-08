@@ -7,7 +7,7 @@ namespace Asv.ULog;
 ///
 /// The default parameter message defines the default value of a parameter for a given vehicle and setup.
 /// </summary>
-public class ULogDefaultParameterMessageToken : ULogParameterMessageToken, IEquatable<ULogDefaultParameterMessageToken>
+public class ULogDefaultParameterMessageToken : ULogParameterMessageToken, IEquatable<ULogDefaultParameterMessageToken>, IULogDefinitionToken, IULogDataToken
 {
     public static ULogToken Token => ULogToken.DefaultParameter;
     public new const string Name = "Default Parameter";
@@ -15,7 +15,7 @@ public class ULogDefaultParameterMessageToken : ULogParameterMessageToken, IEqua
 
     public override string TokenName => Name;
     public override ULogToken TokenType => Token;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition | UTokenPlaceFlags.Data;
 
     private ULogParameterDefaultTypes _defaultTypes;
 

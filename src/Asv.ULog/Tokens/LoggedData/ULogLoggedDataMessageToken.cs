@@ -5,7 +5,7 @@ namespace Asv.ULog;
 /// <summary>
 /// 'D': Logged Data Message 
 /// </summary>
-public class ULogLoggedDataMessageToken : IULogToken, IEquatable<ULogLoggedDataMessageToken>
+public class ULogLoggedDataMessageToken : IULogDataToken, IEquatable<ULogLoggedDataMessageToken>
 {
     #region Static
 
@@ -17,7 +17,7 @@ public class ULogLoggedDataMessageToken : IULogToken, IEquatable<ULogLoggedDataM
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
 
     /// <summary>
     /// msg_id: unique id to match Logged data Message data. The first use must set this to 0, then increase it.

@@ -5,33 +5,32 @@ namespace Asv.ULog;
 /// 
 /// Message so that a reader can recover from a corrupt message by searching for the next sync message.
 /// </summary>
-public class ULogSynchronizationMessageToken : IULogToken, IEquatable<ULogSynchronizationMessageToken>
+public class ULogSynchronizationMessageToken : IULogDataToken, IEquatable<ULogSynchronizationMessageToken>
 {
     #region Static
 
     public static ULogToken Type => ULogToken.Synchronization;
     public const string Name = "Synchronization";
     public const byte TokenId = (byte)'S';
+    public static ULogSynchronizationMessageToken Instance { get; } = new();
 
     #endregion
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
+    
 
     /// <summary>
     /// Magic byte sequence for synchronization
     /// </summary>
     public static byte[] SyncMagic { get; } = [0x2F, 0x73, 0x13, 0x20, 0x25, 0x0C, 0xBB, 0x12];
-    
+
     /// <summary>
     /// Full message with header.
     /// Not part of a real token! 
     /// </summary>
-    public static byte[] FullMessage { get; } = new byte[] {0x08, 0x00}
-        .Concat([TokenId])
-        .Concat(SyncMagic)
-        .ToArray();
+    public static byte[] FullMessage { get; } = [0x08, 0x00, TokenId, 0x2F, 0x73, 0x13, 0x20, 0x25, 0x0C, 0xBB, 0x12];
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
@@ -45,8 +44,9 @@ public class ULogSynchronizationMessageToken : IULogToken, IEquatable<ULogSynchr
 
     public void Serialize(ref Span<byte> buffer)
     {
-        for (var i = 0; i < SyncMagic.Length; i++) buffer[i] = SyncMagic[i];
+        SyncMagic.CopyTo(buffer);
         buffer = buffer[SyncMagic.Length..];
+        
     }
 
     public int GetByteSize()

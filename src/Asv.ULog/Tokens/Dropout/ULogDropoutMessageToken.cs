@@ -8,7 +8,7 @@ namespace Asv.ULog;
 /// Mark a dropout (lost logging messages) of a given duration in ms.
 /// Dropouts can occur e.g. if the device is not fast enough.
 /// </summary>
-public class ULogDropoutMessageToken : IULogToken, IEquatable<ULogDropoutMessageToken>
+public class ULogDropoutMessageToken : IULogDataToken, IEquatable<ULogDropoutMessageToken>
 {
     public static ULogToken Token => ULogToken.Dropout;
     public const string Name = "Dropout message";
@@ -16,7 +16,7 @@ public class ULogDropoutMessageToken : IULogToken, IEquatable<ULogDropoutMessage
 
     public string TokenName => Name;
     public ULogToken TokenType => Token;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
 
     /// <summary>
     /// Duration of the lost logging messages in ms.

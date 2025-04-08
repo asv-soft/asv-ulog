@@ -47,7 +47,7 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyA
 
     public abstract string TokenName { get; }
     public abstract ULogToken TokenType { get; }
-    public abstract TokenPlaceFlags TokenSection { get; }
+    public abstract UTokenPlaceFlags TokenSection { get; }
 
     public ULogTypeAndNameDefinition Key { get; set; } = null!;
     public byte[] Value { get; set; }

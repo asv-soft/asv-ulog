@@ -6,8 +6,12 @@ public interface IULogToken : ISizedSpanSerializable
 {
     string TokenName { get; }
     ULogToken TokenType { get; }
-    TokenPlaceFlags TokenSection { get; }
+    UTokenPlaceFlags TokenSection { get; }
 }
+
+public interface IULogDefinitionToken : IULogToken;
+
+public interface IULogDataToken : IULogToken;
 
 /// <summary>
 /// ULog files have the following three sections:
@@ -21,7 +25,7 @@ public interface IULogToken : ISizedSpanSerializable
 /// ----------------------
 /// </summary>
 [Flags]
-public enum TokenPlaceFlags
+public enum UTokenPlaceFlags
 {
     None = 0,
 

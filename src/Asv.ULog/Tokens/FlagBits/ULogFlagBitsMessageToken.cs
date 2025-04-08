@@ -23,7 +23,7 @@ public class ULogFlagBitsMessageToken : IULogToken, IEquatable<ULogFlagBitsMessa
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition;
 
 
     /// <summary>

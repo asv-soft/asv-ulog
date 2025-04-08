@@ -7,7 +7,7 @@ namespace Asv.ULog;
 /// 
 /// Logged string message, i.e. printf() output.
 /// </summary>
-public class ULogLoggedStringMessageToken : IULogToken, IEquatable<ULogLoggedStringMessageToken>
+public class ULogLoggedStringMessageToken : IULogDataToken, IEquatable<ULogLoggedStringMessageToken>
 {
     #region Static
 
@@ -21,7 +21,7 @@ public class ULogLoggedStringMessageToken : IULogToken, IEquatable<ULogLoggedStr
 
     public string TokenName => Name;
     public ULogToken TokenType => Token;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
 
     /// <summary>
     /// log level same as in the Linux kernel

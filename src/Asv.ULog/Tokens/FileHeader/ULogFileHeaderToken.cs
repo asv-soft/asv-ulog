@@ -50,7 +50,7 @@ public class ULogFileHeaderToken : IULogToken, IEquatable<ULogFileHeaderToken>
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Header;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Header;
 
     public bool TryRead(ReadOnlySequence<byte> data)
     {

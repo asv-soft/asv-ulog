@@ -86,7 +86,7 @@ public class ULogSynchronizationMessageTokenTests
     [Fact]
     public void SerializeToken_NotEnoughSpace()
     {
-        Assert.Throws<IndexOutOfRangeException>(() =>
+        Assert.Throws<ArgumentException>(() =>
         {
             var token = SetUpTestToken();
             var span = new Span<byte>(new byte[ULogSynchronizationMessageToken.SyncMagic.Length - 1]);

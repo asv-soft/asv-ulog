@@ -12,7 +12,8 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Asv.IO" Version="$(AsvIOVersion)" />
+      <PackageReference Include="Asv.IO" Version="$(AsvCommonVersion)" />
+      <PackageReference Include="Asv.Common" Version="$(AsvCommonVersion)" />
     </ItemGroup>
 
 </Project>

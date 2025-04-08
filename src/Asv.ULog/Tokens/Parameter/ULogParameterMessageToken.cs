@@ -8,7 +8,7 @@ namespace Asv.ULog;
 ///
 /// If a parameter dynamically changes during runtime, this message can also be used in the Data section as well.
 /// </summary>
-public class ULogParameterMessageToken : ULogKeyAndValueTokenBase, IEquatable<ULogParameterMessageToken>
+public class ULogParameterMessageToken : ULogKeyAndValueTokenBase, IEquatable<ULogParameterMessageToken>, IULogDefinitionToken, IULogDataToken
 {
     #region Static
 
@@ -20,7 +20,7 @@ public class ULogParameterMessageToken : ULogKeyAndValueTokenBase, IEquatable<UL
 
     public override string TokenName => Name;
     public override ULogToken TokenType => Type;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition | UTokenPlaceFlags.Data;
 
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {

@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Immutable;
 using System.Text;
 using Asv.ULog.Information;
@@ -8,7 +9,10 @@ namespace Asv.ULog;
 public static class ULog
 {
     public static readonly Encoding Encoding = Encoding.UTF8;
-
+    /// <summary>
+    /// ushort (size) + byte (type)
+    /// </summary>
+    public const int TokenHeaderSize = 4;
     public static IULogReader CreateReader(ILogger? logger = null)
     {
         var builder = ImmutableDictionary.CreateBuilder<byte, Func<IULogToken>>();
@@ -28,11 +32,22 @@ public static class ULog
         return new ULogReader(builder.ToImmutable(), logger);
     }
 
-    public static IULogWriter CreateWriter(ILogger? logger = null)
+    public static IULogWriter CreateWriter(IBufferWriter<byte> buffer, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
     {
-        return new ULogWriter(logger);
+        return new ULogBufferFileWriter(buffer, sourceName, writeSyncTokenEveryXTokens,disposeStream);
     }
-
+    
+    public static IULogWriter CreateWriter(Stream stream, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
+    {
+        return new ULogStreamFileWriter(stream, sourceName, writeSyncTokenEveryXTokens,disposeStream);
+    }
+    
+    public static ulong FromDateTimeToUnixMicroseconds(DateTime dateTime)
+    {
+        var dateTimeOffset = new DateTimeOffset(dateTime.ToUniversalTime());
+        return (ulong)(dateTimeOffset.ToUnixTimeMilliseconds() * 1000 + (dateTimeOffset.Ticks % TimeSpan.TicksPerMillisecond) / 10);
+    }
+    
     // TODO: remove this by Create ULogValue
     public static ValueType GetSimpleValue(ULogType type, byte[] value)
     {

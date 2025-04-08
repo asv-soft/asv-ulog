@@ -20,7 +20,7 @@ public class ULogUnknownToken : IULogToken, IEquatable<ULogUnknownToken>
 
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.DefinitionAndData;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.DefinitionAndData;
 
     public char UnknownTypeChar { get; private set; }
 

@@ -9,7 +9,7 @@ namespace Asv.ULog;
 /// Subscribe a message by name and give it an id that is used in Logged data Message.
 /// This must come before the first corresponding Logged data Message.
 /// </summary>
-public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscriptionMessageToken>
+public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscriptionMessageToken>, IULogDefinitionToken, IULogDataToken
 {
     public static ULogToken Type = ULogToken.Subscription;
     public const string Name = "Subscription";
@@ -18,7 +18,7 @@ public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscript
     private string _messageName = null!;
     public string TokenName => Name;
     public ULogToken TokenType => Type;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition | UTokenPlaceFlags.Data;
 
     /// <summary>
     /// The same message format can have multiple instances, for example if the system has two sensors of the same type.

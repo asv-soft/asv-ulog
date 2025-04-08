@@ -2,7 +2,7 @@ using Asv.IO;
 
 namespace Asv.ULog;
 
-public class ULogTaggedLoggedStringMessageToken : IULogToken, IEquatable<ULogTaggedLoggedStringMessageToken>
+public class ULogTaggedLoggedStringMessageToken : IULogDataToken, IEquatable<ULogTaggedLoggedStringMessageToken>
 {
     #region Static
 
@@ -14,7 +14,7 @@ public class ULogTaggedLoggedStringMessageToken : IULogToken, IEquatable<ULogTag
 
     public string TokenName => Name;
     public ULogToken TokenType => Token;
-    public TokenPlaceFlags TokenSection => TokenPlaceFlags.Data;
+    public UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Data;
 
     /// <summary>
     /// log_level: same as in the Linux kernel

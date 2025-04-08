@@ -6,7 +6,7 @@ namespace Asv.ULog.Information;
 /// 'M': Multi Information Message
 /// Multi information message serves the same purpose as the information message, but for long messages or multiple messages with the same key.
 /// </summary>
-public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase, IEquatable<ULogMultiInformationMessageToken>
+public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase, IEquatable<ULogMultiInformationMessageToken>, IULogDefinitionToken, IULogDataToken
 {
     #region Static
 
@@ -19,7 +19,7 @@ public class ULogMultiInformationMessageToken : ULogKeyAndValueTokenBase, IEquat
     private byte _isContinued;
     public override string TokenName => Name;
     public override ULogToken TokenType => Type;
-    public override TokenPlaceFlags TokenSection => TokenPlaceFlags.Definition | TokenPlaceFlags.Data;
+    public override UTokenPlaceFlags TokenSection => UTokenPlaceFlags.Definition | UTokenPlaceFlags.Data;
 
     /// <summary>
     /// IsContinued can be used for split-up messages: if set to 1, it is part of the previous message with the same key.

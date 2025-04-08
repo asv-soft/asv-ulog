@@ -72,7 +72,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 if (!InternalReadToken(ref rdr, ref token)) return false;
                 Debug.Assert(token != null);
                 // if we read all definition tokens, then we can switch to data section
-                if (token.TokenSection.HasFlag(TokenPlaceFlags.Data) && !token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+                if (token.TokenSection.HasFlag(UTokenPlaceFlags.Data) && !token.TokenSection.HasFlag(UTokenPlaceFlags.Definition))
                 {
                     _state = ReaderState.DataSection;
                 }
@@ -90,12 +90,12 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                     Debug.Assert(token is not null);
                     if (token.TokenType is ULogToken.Unknown)
                     {
-                        throw new UnknownTokenException();
+                        throw new ULogUnknownTokenException();
                     }
                     
-                    if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
+                    if (!token.TokenSection.HasFlag(UTokenPlaceFlags.Data))
                     {
-                        throw new WrongTokenSectionException();
+                        throw new ULogWrongTokenSectionException();
                     }
                 }
                 catch (ULogException)
