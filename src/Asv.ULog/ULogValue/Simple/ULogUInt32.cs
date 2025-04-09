@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Asv.IO;
 
 namespace Asv.ULog;
@@ -22,16 +23,18 @@ public class ULogUInt32 : ULogSimple
     }
 
     public override UValueType Type => UValueType.UInt32;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         BinSerialize.ReadUInt(ref buffer, ref _value);
-    }
+    }[MethodImpl(MethodImplOptions.AggressiveInlining)]
     
     public override void Serialize(ref Span<byte> buffer)
     {
         BinSerialize.WriteUInt(ref buffer, _value);
     }
-    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetByteSize() => sizeof(uint);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal override ValueType GetValue() => _value;
 }
