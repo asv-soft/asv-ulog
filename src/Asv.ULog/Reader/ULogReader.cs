@@ -1,29 +1,11 @@
 using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace Asv.ULog;
 
-public enum ULogToken : byte
-{
-    Unknown,
-    FileHeader,
-    FlagBits = (byte)'B',
-    Format = (byte)'F',
-    Information = (byte)'I',
-    MultiInformation = (byte)'M',
-    Parameter = (byte)'P',
-    DefaultParameter = (byte)'Q',
-    Unsubscription = (byte)'R',
-    Subscription = (byte)'A',
-    LoggedData = (byte)'D',
-    LoggedString = (byte)'L',
-    Synchronization = (byte)'S',
-    TaggedLoggedString = (byte)'C',
-    Dropout = (byte)'O',
-}
+
 
 public interface IULogReader
 {
@@ -73,7 +55,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 if (!InternalReadToken(ref rdr, ref token)) return false;
                 Debug.Assert(token != null);
                 // if we read all definition tokens, then we can switch to data section
-                if (token.TokenSection.HasFlag(TokenPlaceFlags.Data) && !token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+                if (token.TokenSection.HasFlag(UTokenPlaceFlags.Data) && !token.TokenSection.HasFlag(UTokenPlaceFlags.Definition))
                 {
                     _state = ReaderState.DataSection;
                 }
@@ -91,12 +73,12 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                     Debug.Assert(token is not null);
                     if (token.TokenType is ULogToken.Unknown)
                     {
-                        throw new UnknownTokenException();
+                        throw new ULogUnknownTokenException();
                     }
                     
-                    if (!token.TokenSection.HasFlag(TokenPlaceFlags.Data))
+                    if (!token.TokenSection.HasFlag(UTokenPlaceFlags.Data))
                     {
-                        throw new WrongTokenSectionException();
+                        throw new ULogWrongTokenSectionException();
                     }
                 }
                 catch (ULogException)
@@ -123,9 +105,8 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         return true;
     }
 
-    private static bool InternalReadSyncSequence(ref SequenceReader<byte> rdr, [DisallowNull] ref IULogToken? token)
+    private bool InternalReadSyncSequence(ref SequenceReader<byte> rdr, ref IULogToken? token)
     {
-        if (token == null) throw new ArgumentNullException(nameof(token));
         token = null;
         var i = 0;
 
@@ -151,11 +132,12 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
                 
                 i = 0;
             }
-
-            if (i != ULogSynchronizationMessageToken.FullMessage.Length) continue;
             
-            token = new ULogSynchronizationMessageToken();
-            return true;
+            if (i == ULogSynchronizationMessageToken.FullMessage.Length)
+            {
+                token = new ULogSynchronizationMessageToken();
+                return true;
+            }
         }
 
         rdr.Rewind(ULogSynchronizationMessageToken.FullMessage.Length);
@@ -164,11 +146,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
 
     private bool InternalReadToken(ref SequenceReader<byte> rdr, ref IULogToken? token)
     {
-        if (rdr.TryReadLittleEndian(out ushort size) == false)
-        {
-            _state = ReaderState.Corrupted;
-            return false;
-        }
+        if (rdr.TryReadLittleEndian(out ushort size) == false) return false;
         if (rdr.TryRead(out var type) == false)
         {
             rdr.Rewind(sizeof(ushort)); // rewind size
@@ -178,11 +156,7 @@ public class ULogReader(ImmutableDictionary<byte, Func<IULogToken>> factory, ILo
         var payloadBuffer = ArrayPool<byte>.Shared.Rent(size);
         try
         {
-            if (rdr.TryCopyTo(new Span<byte>(payloadBuffer, 0, size)) == false)
-            {
-                _state = ReaderState.Corrupted;
-                return false;
-            }
+            if (rdr.TryCopyTo(new Span<byte>(payloadBuffer, 0, size)) == false) return false;
             token = factory.TryGetValue(type, out var tokenFactory) ? tokenFactory() : new ULogUnknownToken(type, size);
             var readSpan = new ReadOnlySpan<byte>(payloadBuffer, 0, size);
             token.Deserialize(ref readSpan);

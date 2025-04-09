@@ -14,19 +14,19 @@ public class Program
 
             config.AddCommand<UlogFileStatistic>("ulog_statistic")
                 .WithDescription("Show statistics about the ULog file")
-                .WithExample("ulog_statistic", "file.ulg");
+                .WithExample(["ulog_statistic", "file.ulg"]);
 
             config.AddCommand<UlogInfo>("ulog_info")
                 .WithDescription("Show information about the ULog file")
-                .WithExample("ulog_info", "file.ulg");
+                .WithExample(["ulog_info", "file.ulg"]);
 
             config.AddCommand<UlogMessages>("ulog_messages")
                 .WithDescription("Display logged messages from a ULog file")
-                .WithExample("ulog_messages", "file.ulg");
+                .WithExample(["ulog_messages", "file.ulg"]);
 
             config.AddCommand<UlogParams>("ulog_params")
                 .WithDescription("Display parameters from a ULog file")
-                .WithExample("ulog_params", "file.ulg");
+                .WithExample(["ulog_params", "file.ulg"]);
         });
 
         return app.Run(args);

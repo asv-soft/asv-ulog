@@ -1,25 +1,20 @@
 using System.Buffers;
-using System.Collections.Immutable;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using Asv.ULog;
 using Asv.ULog.Information;
-using Asv.Ulog.Tests;
 using Xunit.Abstractions;
 
-namespace Asv.ULog.Tests;
+namespace Asv.Ulog.Tests;
 
 public class ULogWriteReadTests
 {
     private readonly ITestOutputHelper _output;
     private readonly IULogReader _reader;
-    private readonly IULogWriter _writer;
 
     public ULogWriteReadTests(ITestOutputHelper output)
     {
         _output = output;
-        _reader = ULog.CreateReader();
-        _writer = ULog.CreateWriter();
+        _reader = ULog.ULog.CreateReader();
     }
 
     [Fact]
@@ -126,16 +121,16 @@ public class ULogWriteReadTests
         };
 
         var bufferWriter = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, format1);
-        _writer.AppendDefinition(bufferWriter, format2);
-        _writer.AppendDefinition(bufferWriter, infoToken);
-        _writer.AppendDefinition(bufferWriter, paramToken);
-        _writer.AppendData(bufferWriter, loggedDataToken);
-        _writer.AppendData(bufferWriter, loggedStringToken);
-        _writer.AppendData(bufferWriter, syncToken);
-        _writer.AppendData(bufferWriter, dropoutToken);
+        var writer = ULog.ULog.CreateWriter(bufferWriter,"test");
+        writer.AppendHeader(header, fBits);
+        writer.AppendDefinition(format1);
+        writer.AppendDefinition(format2);
+        writer.AppendDefinition(infoToken);
+        writer.AppendDefinition(paramToken);
+        writer.AppendData(loggedDataToken);
+        writer.AppendData(loggedStringToken);
+        writer.AppendData(syncToken);
+        writer.AppendData(dropoutToken);
         
         var written = new List<IULogToken>(
             [header, fBits, format1, format2, infoToken, 
@@ -159,16 +154,16 @@ public class ULogWriteReadTests
         Assert.Equal(10, tokenCount); 
         
         var bufferWriter2 = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter2, header, fBits);
-        _writer.AppendDefinition(bufferWriter2, format1);
-        _writer.AppendDefinition(bufferWriter2, format2);
-        _writer.AppendDefinition(bufferWriter2, infoToken);
-        _writer.AppendDefinition(bufferWriter2, paramToken);
-        _writer.AppendData(bufferWriter2, loggedDataToken);
-        _writer.AppendData(bufferWriter2, loggedStringToken);
-        _writer.AppendData(bufferWriter2, syncToken);
-        _writer.AppendData(bufferWriter2, dropoutToken);
+        writer = ULog.ULog.CreateWriter(bufferWriter2,"test");
+        writer.AppendHeader(header, fBits);
+        writer.AppendDefinition(format1);
+        writer.AppendDefinition(format2);
+        writer.AppendDefinition(infoToken);
+        writer.AppendDefinition(paramToken);
+        writer.AppendData(loggedDataToken);
+        writer.AppendData(loggedStringToken);
+        writer.AppendData(syncToken);
+        writer.AppendData(dropoutToken);
 
         var hash2 = ComputeHash(bufferWriter2.WrittenSpan.ToArray());
         
@@ -183,7 +178,7 @@ public class ULogWriteReadTests
         var bytes = TestData.ulog_with_px4_events;
         var data = new ReadOnlySequence<byte>(bytes);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.CreateReader();
+        var reader = ULog.ULog.CreateReader();
         var tokens = new List<IULogToken>();
         while (reader.TryRead(ref rdr, out var token))
         {
@@ -192,7 +187,7 @@ public class ULogWriteReadTests
         }
         
         var buffer = new ArrayBufferWriter<byte>();
-
+        var writer = ULog.ULog.CreateWriter(buffer, "test");
         ULogFileHeaderToken? header = null;
         ULogFlagBitsMessageToken? fBits = null;
         var isHeaderWrote = false;
@@ -200,7 +195,7 @@ public class ULogWriteReadTests
         {
             if (header != null && fBits != null && !isHeaderWrote)
             {
-                _writer.AddHeaderAndFlagBits(buffer, header, fBits);
+                writer.AppendHeader(header, fBits);
                 isHeaderWrote = true;
             }
             
@@ -216,15 +211,16 @@ public class ULogWriteReadTests
                 continue;
             }
 
-            if (token.TokenSection.HasFlag(TokenPlaceFlags.Definition))
+            if (token.TokenSection.HasFlag(UTokenPlaceFlags.Definition) && 
+                token.TokenSection.HasFlag(UTokenPlaceFlags.Data) == false)
             {
-                _writer.AppendDefinition(buffer, token);
+                writer.AppendDefinition((IULogDefinitionToken)token);
                 continue;
             }
 
-            if (token.TokenSection.HasFlag(TokenPlaceFlags.Data))
+            if (token.TokenSection.HasFlag(UTokenPlaceFlags.Data))
             {
-                _writer.AppendData(buffer, token);
+                writer.AppendData((IULogDataToken)token);
                 continue;
             }
         }
@@ -256,8 +252,8 @@ public class ULogWriteReadTests
         };
         
         var bufferWriter = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendHeader(header, fBits);
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
 
@@ -289,9 +285,9 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
+        var bufferWriter = new ArrayBufferWriter<byte>(); 
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendHeader(header, fBits);
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
 
@@ -353,10 +349,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); 
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendHeader(header, fBits);
+        writer.AppendDefinition(token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -400,10 +396,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
-
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); 
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -460,10 +456,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -504,10 +500,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -561,10 +557,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -605,10 +601,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -663,10 +659,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -708,10 +704,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -767,10 +763,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -812,10 +808,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -863,10 +859,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -900,10 +896,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendDefinition( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -928,8 +924,9 @@ public class ULogWriteReadTests
             MessageId = 100
         };
 
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); 
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -961,10 +958,11 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); 
+        var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -975,7 +973,7 @@ public class ULogWriteReadTests
             {
                 MessageId = 999
             };
-            if (readToken?.TokenType == ULogToken.Unsubscription) Assert.NotEqual(fakeToken, readToken);
+            if (readToken?.TokenType == ULogToken.LoggedData) Assert.NotEqual(fakeToken, readToken);
         }
     }
     
@@ -1001,10 +999,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1024,8 +1022,8 @@ public class ULogWriteReadTests
             Data = [1, 2, 3, 4]
         };
 
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1064,10 +1062,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1101,10 +1099,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1145,10 +1143,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1183,10 +1181,10 @@ public class ULogWriteReadTests
             AppendedOffsets = [1UL, 2UL, 3UL]
         };
         
-        var bufferWriter = new ArrayBufferWriter<byte>();
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
 
-        _writer.AddHeaderAndFlagBits(bufferWriter, header, fBits);
-        _writer.AppendDefinition(bufferWriter, token);
+        writer.AppendHeader( header, fBits);
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1212,8 +1210,8 @@ public class ULogWriteReadTests
             Duration = 100
         };
 
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1232,8 +1230,8 @@ public class ULogWriteReadTests
             Duration = 100
         };
 
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
@@ -1253,8 +1251,8 @@ public class ULogWriteReadTests
     {
         var token = new ULogSynchronizationMessageToken();
 
-        var bufferWriter = new ArrayBufferWriter<byte>();
-        _writer.AppendDefinition(bufferWriter, token);
+        var bufferWriter = new ArrayBufferWriter<byte>(); var writer = ULog.ULog.CreateWriter(bufferWriter, "test");
+        writer.AppendData( token);
 
         var data = new ReadOnlySequence<byte>(bufferWriter.WrittenSpan.ToArray());
         var rdr = new SequenceReader<byte>(data);
