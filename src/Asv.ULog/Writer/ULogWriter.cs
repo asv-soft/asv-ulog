@@ -26,11 +26,13 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
         {
             throw new ULogWriterException($"ULog header already written. Current state: {_logWriterState:G}");
         }
-        InternalAppend(header);
+        InternalAppendHeader(header);
         InternalAppend(flags);
         _logWriterState = ULogWriterState.AppendDefinition;
         return this;
     }
+
+    
 
     public IULogWriter AppendDefinition(IULogDefinitionToken definitionToken)
     {
@@ -73,6 +75,7 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
         return this;
     }
 
+    protected abstract void InternalAppendHeader(ULogFileHeaderToken header);
     protected abstract void InternalAppend(IULogToken token);
     
     

@@ -69,6 +69,7 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable, IEquata
         Type = new ULogTypeDefinition();
         Type.Deserialize(type);
         Name = rawString[(colonIndex + 1)..].Trim().ToString();
+        rawString = rawString[rawString.Length..];
     }
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)

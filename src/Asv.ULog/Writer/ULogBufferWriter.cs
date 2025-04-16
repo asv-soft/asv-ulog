@@ -14,6 +14,14 @@ public class ULogBufferWriter : ULogWriter
         _buffer = buffer;
     }
 
+    protected override void InternalAppendHeader(ULogFileHeaderToken token)
+    {
+        var size = token.GetByteSize();
+        var span = _buffer.GetSpan(size);
+        token.Serialize(ref span);
+        _buffer.Advance(size);
+    }
+
     protected override void InternalAppend(IULogToken token)
     {
         var size = token.GetByteSize();

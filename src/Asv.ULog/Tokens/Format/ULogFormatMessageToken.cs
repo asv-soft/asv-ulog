@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Asv.Common;
@@ -73,33 +74,48 @@ public partial class ULogFormatMessageToken : IULogDefinitionToken, IEquatable<U
     /// </summary>
     public IList<ULogTypeAndNameDefinition> Fields { get; } = [];
 
-    public void Deserialize(ref ReadOnlySpan<byte> buffer)
+    public void Deserialize(ref ReadOnlySpan<char> input)
     {
-        var charSize = ULog.Encoding.GetCharCount(buffer);
-        var charBuffer = new char[charSize];
-        var input = new ReadOnlySpan<char>(charBuffer);
-        var size = ULog.Encoding.GetChars(buffer, charBuffer);
-        Debug.Assert(charSize == size);
-
         var colonIndex = input.IndexOf(MessageAndFieldsSeparator);
         if (colonIndex == -1)
             throw new ULogException(
                 $"Invalid format message for token {Type:G}: '{MessageAndFieldsSeparator}' not found. Origin string: {input.ToString()}");
         var messageNameSpan = input[..colonIndex];
         MessageName = messageNameSpan.ToString();
-        var fieldsSpan = input[(colonIndex + 1)..];
-        while (!fieldsSpan.IsEmpty)
+        input = input[(colonIndex + 1)..];
+        while (!input.IsEmpty)
         {
-            var semicolonIndex = fieldsSpan.IndexOf(FieldSeparator);
+            var semicolonIndex = input.IndexOf(FieldSeparator);
             if (semicolonIndex == -1)
                 throw new ULogException(
-                    $"Invalid format message for token {Type:G}: '{FieldSeparator}' not found. Origin string: {fieldsSpan.ToString()}");
+                    $"Invalid format message for token {Type:G}: '{FieldSeparator}' not found. Origin string: {input.ToString()}");
 
-            var field = fieldsSpan[..semicolonIndex];
+            var field = input[..semicolonIndex];
             var newItem = new ULogTypeAndNameDefinition();
             newItem.Deserialize(ref field);
+            Debug.Assert(field.Length == 0);
             Fields.Add(newItem);
-            fieldsSpan = fieldsSpan[(semicolonIndex + 1)..];
+            input = input[(semicolonIndex + 1)..];
+        }
+    }
+    
+    public void Deserialize(ref ReadOnlySpan<byte> buffer)
+    {
+        var charSize = ULog.Encoding.GetCharCount(buffer);
+        var charBuffer = ArrayPool<char>.Shared.Rent(charSize);
+        try
+        {
+            var writeSpan = new Span<char>(charBuffer, 0, charSize);
+            var size = ULog.Encoding.GetChars(buffer,writeSpan);
+            Debug.Assert(charSize == size);
+            var readSpan = new ReadOnlySpan<char>(charBuffer, 0, charSize);
+            Deserialize(ref readSpan);
+            Debug.Assert(readSpan.Length == 0);
+            buffer = buffer[charSize..];
+        }
+        finally
+        {
+            ArrayPool<char>.Shared.Return(charBuffer);
         }
     }
 

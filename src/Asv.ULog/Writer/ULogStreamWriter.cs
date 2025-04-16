@@ -14,6 +14,22 @@ public class ULogStreamWriter : ULogWriter
         _stream = stream;
     }
 
+    protected override void InternalAppendHeader(ULogFileHeaderToken token)
+    {
+        var size = token.GetByteSize();
+        var buffer = ArrayPool<byte>.Shared.Rent(size);
+        try
+        {
+            var span = new Span<byte>(buffer, 0, size);
+            token.Serialize(ref span);
+            _stream.Write(buffer, 0, size);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
     protected override void InternalAppend(IULogToken token)
     {
         var size = token.GetByteSize();

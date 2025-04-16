@@ -96,7 +96,10 @@ public class ULogFileHeaderToken : IULogToken, IEquatable<ULogFileHeaderToken>
 
     public void Serialize(ref Span<byte> buffer)
     {
-        for (var i = 0; i < FileMagic.Length; i++) buffer[i] = FileMagic[i];
+        for (var i = 0; i < FileMagic.Length; i++)
+        {
+            buffer[i] = FileMagic[i];
+        }
         buffer = buffer[FileMagic.Length..];
         BinSerialize.WriteByte(ref buffer, _version);
         BinSerialize.WriteULong(ref buffer, _timestamp);
