@@ -3,11 +3,11 @@ using Asv.IO;
 
 namespace Asv.ULog;
 
-public class ULogBufferFileWriter : ULogWriter
+public class ULogBufferWriter : ULogWriter
 {
     private readonly IBufferWriter<byte> _buffer;
 
-    public ULogBufferFileWriter(IBufferWriter<byte> buffer, string sourceName, int? writeSyncTokenEveryXToken, bool disposeBuffer = true) 
+    public ULogBufferWriter(IBufferWriter<byte> buffer, string sourceName, int? writeSyncTokenEveryXToken, bool disposeBuffer = true) 
         : base(sourceName, writeSyncTokenEveryXToken, disposeBuffer ? buffer as IDisposable : null)
     {
         ArgumentNullException.ThrowIfNull(buffer);

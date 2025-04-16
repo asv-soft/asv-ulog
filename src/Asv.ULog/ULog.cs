@@ -34,12 +34,12 @@ public static class ULog
 
     public static IULogWriter CreateWriter(IBufferWriter<byte> buffer, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
     {
-        return new ULogBufferFileWriter(buffer, sourceName, writeSyncTokenEveryXTokens,disposeStream);
+        return new ULogBufferWriter(buffer, sourceName, writeSyncTokenEveryXTokens,disposeStream);
     }
     
     public static IULogWriter CreateWriter(Stream stream, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
     {
-        return new ULogStreamFileWriter(stream, sourceName, writeSyncTokenEveryXTokens,disposeStream);
+        return new ULogStreamWriter(stream, sourceName, writeSyncTokenEveryXTokens,disposeStream);
     }
     
     public static ulong FromDateTimeToUnixMicroseconds(DateTime dateTime)

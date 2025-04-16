@@ -9,7 +9,6 @@
 
     <ItemGroup>
         <PackageReference Include="Asv.IO" Version="$(AsvCommonVersion)" />
-        <PackageReference Include="Asv.Common" Version="$(AsvCommonVersion)" />
     </ItemGroup>
 
 </Project>

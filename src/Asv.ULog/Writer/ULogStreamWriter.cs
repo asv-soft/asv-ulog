@@ -3,11 +3,11 @@ using Asv.IO;
 
 namespace Asv.ULog;
 
-public class ULogStreamFileWriter : ULogWriter
+public class ULogStreamWriter : ULogWriter
 {
     private readonly Stream _stream;
 
-    public ULogStreamFileWriter(Stream stream, string sourceName, int? writeSyncTokenEveryXToken = null, bool disposeStream = false) 
+    public ULogStreamWriter(Stream stream, string sourceName, int? writeSyncTokenEveryXToken = null, bool disposeStream = false) 
         : base(sourceName, writeSyncTokenEveryXToken, disposeStream ? stream : null)
     {
         ArgumentNullException.ThrowIfNull(stream);
