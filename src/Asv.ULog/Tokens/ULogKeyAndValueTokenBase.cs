@@ -27,6 +27,10 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyA
         Key = new ULogTypeAndNameDefinition();
         Key.Deserialize(ref key);
         buffer = buffer[keyLen..];
+        switch (Key.Type.BaseType)
+        {
+            
+        }
         Value = buffer.ToArray();
     }
 

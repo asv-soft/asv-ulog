@@ -280,5 +280,6 @@ public abstract class ULogValue:ISizedSpanSerializable,ICloneable
     public abstract void Deserialize(ref ReadOnlySpan<byte> buffer);
     public abstract void Serialize(ref Span<byte> buffer);
     public abstract int GetByteSize();
+
     
 }
