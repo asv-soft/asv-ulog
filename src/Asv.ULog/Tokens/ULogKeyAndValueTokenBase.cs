@@ -27,11 +27,7 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyA
         Key = new ULogTypeAndNameDefinition();
         Key.Deserialize(ref key);
         buffer = buffer[keyLen..];
-        switch (Key.Type.BaseType)
-        {
-            
-        }
-        Value = buffer.ToArray();
+        Value = ULogValueMixin.CreateNonReferenceType(Key.Type);
     }
 
     public virtual void Serialize(ref Span<byte> buffer)
@@ -40,13 +36,12 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyA
         var additionalSymbolsSize = arraySizeStr.Length;
         BinSerialize.WriteByte(ref buffer, (byte)(Key.Type.TypeName.Length + additionalSymbolsSize + Key.Name.Length));
         Key.Serialize(ref buffer);
-        Value.CopyTo(buffer);
-        buffer = buffer[Value.Length..];
+        Value.Serialize(ref buffer);
     }
 
     public virtual int GetByteSize()
     {
-        return sizeof(byte) + Key.GetByteSize() + Value.Length;
+        return sizeof(byte) + Key.GetByteSize() + Value.GetByteSize();
     }
 
     public abstract string TokenName { get; }
@@ -54,14 +49,14 @@ public abstract class ULogKeyAndValueTokenBase : IULogToken, IEquatable<ULogKeyA
     public abstract UTokenPlaceFlags TokenSection { get; }
 
     public ULogTypeAndNameDefinition Key { get; set; } = null!;
-    public byte[] Value { get; set; }
+    public ULogValue Value { get; set; }
 
     public bool Equals(ULogKeyAndValueTokenBase? other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
         return TokenName == other.TokenName && TokenType == other.TokenType && TokenSection == other.TokenSection && 
-               Key.Equals(other.Key) && Value.SequenceEqual(other.Value);
+               Key.Equals(other.Key) && Value.Equals(other.Value);
     }
 
     public override bool Equals(object? obj)

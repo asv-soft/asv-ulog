@@ -8,6 +8,7 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
     private readonly int? _writeSyncTokenEveryXToken;
     private readonly IDisposable? _disposeIt;
     private int _dataTokenCount;
+    private readonly object _lock = new();
 
     public ULogWriter(string sourceName, int? writeSyncTokenEveryXToken, IDisposable? disposeIt)
     {
@@ -31,8 +32,6 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
         _logWriterState = ULogWriterState.AppendDefinition;
         return this;
     }
-
-    
 
     public IULogWriter AppendDefinition(IULogDefinitionToken definitionToken)
     {
@@ -73,6 +72,11 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
             InternalAppend(ULogSynchronizationMessageToken.Instance);
         }
         return this;
+    }
+
+    public IULogWriter AppendParameter(string name, int value)
+    {
+        throw new NotImplementedException();
     }
 
     protected abstract void InternalAppendHeader(ULogFileHeaderToken header);
