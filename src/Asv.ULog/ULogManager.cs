@@ -14,7 +14,14 @@ public static class ULogManager
     /// ushort (size) + byte (type)
     /// </summary>
     public const int TokenHeaderSize = 4;
-    public static IULogReader CreateReader(ILogger? logger = null)
+    public static ulong FromDateTimeToUnixMicroseconds(DateTime dateTime)
+    {
+        var dateTimeOffset = new DateTimeOffset(dateTime.ToUniversalTime());
+        return (ulong)(dateTimeOffset.ToUnixTimeMilliseconds() * 1000 + (dateTimeOffset.Ticks % TimeSpan.TicksPerMillisecond) / 10);
+    }
+    public static ImmutableDictionary<byte, Func<IULogToken>> TokenFactory { get; }
+
+    static ULogManager()
     {
         var builder = ImmutableDictionary.CreateBuilder<byte, Func<IULogToken>>();
         builder.Add(ULogFlagBitsMessageToken.TokenId, () => new ULogFlagBitsMessageToken());
@@ -30,22 +37,17 @@ public static class ULogManager
         builder.Add(ULogSubscriptionMessageToken.TokenId, () => new ULogSubscriptionMessageToken());
         builder.Add(ULogDropoutMessageToken.TokenId, () => new ULogDropoutMessageToken());
         builder.Add(ULogLoggedDataMessageToken.TokenId, () => new ULogLoggedDataMessageToken());
-        return new ULogReader(builder.ToImmutable(), logger);
+        TokenFactory = builder.ToImmutable();
     }
-    public static IULogTokenWriter CreateWriter(IBufferWriter<byte> buffer, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
+    
+    public static IULogReader OpenGzip(string filePath, CompressionLevel compressionLevel = CompressionLevel.SmallestSize)
     {
-        return new ULogBufferTokenWriter(buffer, sourceName, writeSyncTokenEveryXTokens,disposeStream);
+        var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+        var zip = new GZipStream(fileStream, compressionLevel, false);
+        var tokenReader = new StreamULogTokenReader(zip);
+        return new ULogReader(tokenReader);
     }
-    public static IULogTokenWriter CreateWriter(Stream stream, string sourceName, int? writeSyncTokenEveryXTokens = null, bool disposeStream = true)
-    {
-        return new ULogStreamTokenWriter(stream, sourceName, writeSyncTokenEveryXTokens,disposeStream);
-    }
-    public static ulong FromDateTimeToUnixMicroseconds(DateTime dateTime)
-    {
-        var dateTimeOffset = new DateTimeOffset(dateTime.ToUniversalTime());
-        return (ulong)(dateTimeOffset.ToUnixTimeMilliseconds() * 1000 + (dateTimeOffset.Ticks % TimeSpan.TicksPerMillisecond) / 10);
-    }
-
+    
     public static IULogWriter CreateGzip(string filePath, DateTime timestamp, CompressionLevel compressionLevel = CompressionLevel.SmallestSize,
         int? writeSyncTokenEveryXToken = null)
     {
