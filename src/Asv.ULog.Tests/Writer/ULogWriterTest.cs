@@ -28,7 +28,12 @@ public class ULogWriterTest
             
             using var writer = ULog.ULog.CreateWriter(zip,path);
             writer.AppendHeader(DateTime.Now);
-
+            writer.AppendData(new ULogSubscriptionMessageToken
+            {
+                MultiId = 0,
+                MessageId = 0,
+                MessageName = null
+            });
             writer.AppendDefinition(new ULogParameterMessageToken
             {
                 Key = new ULogTypeAndNameDefinition
@@ -40,7 +45,7 @@ public class ULogWriterTest
                     },
                     Name = "PARAM_0000",
                 },
-                Value = new byte[] { 0, 0, 0, 0 },
+                Value = 0.0f,
             });
             writer.AppendDefinition(new ULogFormatMessageToken
             {
@@ -70,7 +75,7 @@ public class ULogWriterTest
                         },
                         Name = $"PARAM_{i:0000}",
                     },
-                    Value = new byte[] { 0, 0, 0, 0 },
+                    Value = 0.0f,
                     DefaultType = ULogParameterDefaultTypes.SystemWide,
                 });
             }

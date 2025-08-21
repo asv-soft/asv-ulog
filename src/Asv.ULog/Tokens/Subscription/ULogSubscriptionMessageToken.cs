@@ -51,11 +51,11 @@ public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscript
     {
         MultiId = BinSerialize.ReadByte(ref buffer);
         MessageId = BinSerialize.ReadUShort(ref buffer);
-        var charSize = ULog.Encoding.GetCharCount(buffer);
+        var charSize = ULogManager.Encoding.GetCharCount(buffer);
         var charBuffer = ArrayPool<char>.Shared.Rent(charSize);
         try
         {
-            ULog.Encoding.GetChars(buffer, charBuffer);
+            ULogManager.Encoding.GetChars(buffer, charBuffer);
             MessageName = new ReadOnlySpan<char>(charBuffer, 0, charSize).Trim().ToString();
             buffer = buffer[MessageName.Length..];
         }
@@ -70,12 +70,12 @@ public class ULogSubscriptionMessageToken : IULogToken, IEquatable<ULogSubscript
         ULogFormatMessageToken.CheckMessageName(MessageName);
         BinSerialize.WriteByte(ref buffer, MultiId);
         BinSerialize.WriteUShort(ref buffer, MessageId);
-        BinSerialize.WriteBlock(ref buffer, ULog.Encoding.GetBytes(MessageName));
+        BinSerialize.WriteBlock(ref buffer, ULogManager.Encoding.GetBytes(MessageName));
     }
 
     public int GetByteSize()
     {
-        return sizeof(byte) + sizeof(ushort) + ULog.Encoding.GetByteCount(MessageName);
+        return sizeof(byte) + sizeof(ushort) + ULogManager.Encoding.GetByteCount(MessageName);
     }
 
     public bool Equals(ULogSubscriptionMessageToken? other)

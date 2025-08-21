@@ -35,24 +35,96 @@ public class ULogTypeDefinition : ISizedSpanSerializable, IEquatable<ULogTypeDef
     public static readonly int ArrayEndByteSize;
 
     public const string Int8TypeName = "int8_t";
+    public static ULogTypeDefinition Int8Type = new()
+    {
+        BaseType = ULogType.Int8,
+        TypeName = Int8TypeName,
+        ArraySize = 0,
+    };
     public const string UInt8TypeName = "uint8_t";
+    public static ULogTypeDefinition UInt8Type = new()
+    {
+        BaseType = ULogType.UInt8,
+        TypeName = UInt8TypeName,
+        ArraySize = 0,
+    };
     public const string Int16TypeName = "int16_t";
+    public static ULogTypeDefinition Int16Type = new()
+    {
+        BaseType = ULogType.Int16,
+        TypeName = Int16TypeName,
+        ArraySize = 0,
+    };
     public const string UInt16TypeName = "uint16_t";
+    public static ULogTypeDefinition UInt16Type = new()
+    {
+        BaseType = ULogType.UInt16,
+        TypeName = UInt16TypeName,
+        ArraySize = 0,
+    };
     public const string Int32TypeName = "int32_t";
+    public static ULogTypeDefinition Int32Type = new()
+    {
+        BaseType = ULogType.Int32,
+        TypeName = Int32TypeName,
+        ArraySize = 0,
+    };
     public const string UInt32TypeName = "uint32_t";
+    public static ULogTypeDefinition UInt32Type = new()
+    {
+        BaseType = ULogType.UInt32,
+        TypeName = UInt32TypeName,
+        ArraySize = 0,
+    };
     public const string Int64TypeName = "int64_t";
+    public static ULogTypeDefinition Int64Type = new()
+    {
+        BaseType = ULogType.Int64,
+        TypeName = Int64TypeName,
+        ArraySize = 0,
+    };
     public const string UInt64TypeName = "uint64_t";
+    public static ULogTypeDefinition UInt64Type = new()
+    {
+        BaseType = ULogType.UInt64,
+        TypeName = UInt64TypeName,
+        ArraySize = 0,
+    };
     public const string FloatTypeName = "float";
+    public static ULogTypeDefinition FloatType = new()
+    {
+        BaseType = ULogType.Float,
+        TypeName = FloatTypeName,
+        ArraySize = 0,
+    };
     public const string DoubleTypeName = "double";
+    public static ULogTypeDefinition DoubleType = new()
+    {
+        BaseType = ULogType.Double,
+        TypeName = DoubleTypeName,
+        ArraySize = 0,
+    };
     public const string BoolTypeName = "bool";
+    public static ULogTypeDefinition BoolType = new()
+    {
+        BaseType = ULogType.Bool,
+        TypeName = BoolTypeName,
+        ArraySize = 0,
+    };
     public const string CharTypeName = "char";
+    public static ULogTypeDefinition CharType = new()
+    {
+        BaseType = ULogType.Char,
+        TypeName = CharTypeName,
+        ArraySize = 0,
+    };
 
     static ULogTypeDefinition()
     {
         var temp = ArrayStart;
-        ArrayStartByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        ArrayStartByteSize = ULogManager.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
         temp = ArrayEnd;
-        ArrayEndByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        ArrayEndByteSize = ULogManager.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
     }
 
     #endregion
@@ -125,12 +197,12 @@ public class ULogTypeDefinition : ISizedSpanSerializable, IEquatable<ULogTypeDef
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
-        var charSize = ULog.Encoding.GetCharCount(buffer);
+        var charSize = ULogManager.Encoding.GetCharCount(buffer);
         var charBuffer = ArrayPool<char>.Shared.Rent(charSize);
         try
         {
             var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
-            ULog.Encoding.GetChars(buffer, charBuffer);
+            ULogManager.Encoding.GetChars(buffer, charBuffer);
             Deserialize(rawString);
         }
         finally
@@ -143,27 +215,27 @@ public class ULogTypeDefinition : ISizedSpanSerializable, IEquatable<ULogTypeDef
     {
         if (IsArray)
         {
-            _typeName.CopyTo(ref buffer, ULog.Encoding);
+            _typeName.CopyTo(ref buffer, ULogManager.Encoding);
             var temp = ArrayStart;
-            var written = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            var written = ULogManager.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
             buffer = buffer[written..];
-            _arraySize.ToString().CopyTo(ref buffer, ULog.Encoding);
+            _arraySize.ToString().CopyTo(ref buffer, ULogManager.Encoding);
             temp = ArrayEnd;
-            written = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            written = ULogManager.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
             buffer = buffer[written..];
         }
         else
         {
-            _typeName.CopyTo(ref buffer, ULog.Encoding);
+            _typeName.CopyTo(ref buffer, ULogManager.Encoding);
         }
     }
 
     public int GetByteSize()
     {
         return IsArray
-            ? ULog.Encoding.GetByteCount(_typeName) +
-              ArrayStartByteSize + ULog.Encoding.GetByteCount(_arraySize.ToString()) + ArrayEndByteSize
-            : ULog.Encoding.GetByteCount(_typeName);
+            ? ULogManager.Encoding.GetByteCount(_typeName) +
+              ArrayStartByteSize + ULogManager.Encoding.GetByteCount(_arraySize.ToString()) + ArrayEndByteSize
+            : ULogManager.Encoding.GetByteCount(_typeName);
     }
 
     public bool Equals(ULogTypeDefinition? other)
@@ -185,4 +257,38 @@ public class ULogTypeDefinition : ISizedSpanSerializable, IEquatable<ULogTypeDef
     {
         return HashCode.Combine(ArraySize, TypeName, (int)BaseType);
     }
+
+    public ULogTypeDefinition Clone()
+    {
+        return new ULogTypeDefinition
+        {
+            TypeName = TypeName,
+            BaseType = BaseType,
+            ArraySize = ArraySize
+        };
+    }
+    
+    public override string ToString()
+    {
+        var size = GetByteSize();
+        if (size <= 0) return string.Empty;
+
+        var rented = ArrayPool<byte>.Shared.Rent(size);
+        try
+        {
+            var span = new Span<byte>(rented, 0, size);
+            var before = span.Length;
+            Serialize(ref span);
+            var written = before - span.Length;
+
+            return ULogManager.Encoding.GetString(rented, 0, written);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(rented);
+        }
+    }
+
+    
+    
 }

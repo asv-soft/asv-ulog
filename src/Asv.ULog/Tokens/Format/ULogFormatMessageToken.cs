@@ -38,9 +38,9 @@ public partial class ULogFormatMessageToken : IULogDefinitionToken, IEquatable<U
     static ULogFormatMessageToken()
     {
         var temp = FieldSeparator;
-        FieldSeparatorByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        FieldSeparatorByteSize = ULogManager.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
         temp = MessageAndFieldsSeparator;
-        MessageAndFieldsSeparatorByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        MessageAndFieldsSeparatorByteSize = ULogManager.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
     }
 
     public static ULogToken Type => ULogToken.Format;
@@ -101,12 +101,12 @@ public partial class ULogFormatMessageToken : IULogDefinitionToken, IEquatable<U
     
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
-        var charSize = ULog.Encoding.GetCharCount(buffer);
+        var charSize = ULogManager.Encoding.GetCharCount(buffer);
         var charBuffer = ArrayPool<char>.Shared.Rent(charSize);
         try
         {
             var writeSpan = new Span<char>(charBuffer, 0, charSize);
-            var size = ULog.Encoding.GetChars(buffer,writeSpan);
+            var size = ULogManager.Encoding.GetChars(buffer,writeSpan);
             Debug.Assert(charSize == size);
             var readSpan = new ReadOnlySpan<char>(charBuffer, 0, charSize);
             Deserialize(ref readSpan);
@@ -122,22 +122,22 @@ public partial class ULogFormatMessageToken : IULogDefinitionToken, IEquatable<U
     public void Serialize(ref Span<byte> buffer)
     {
         // we need to serialize message name and fields e.g. message_name:field1;field2;field3;
-        MessageName.CopyTo(ref buffer, ULog.Encoding);
+        MessageName.CopyTo(ref buffer, ULogManager.Encoding);
         var temp = MessageAndFieldsSeparator;
-        var write = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+        var write = ULogManager.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
         buffer = buffer[write..];
         foreach (var field in Fields)
         {
             field.Serialize(ref buffer);
             temp = FieldSeparator;
-            write = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+            write = ULogManager.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
             buffer = buffer[write..];
         }
     }
 
     public int GetByteSize()
     {
-        return ULog.Encoding.GetByteCount(MessageName) + MessageAndFieldsSeparatorByteSize +
+        return ULogManager.Encoding.GetByteCount(MessageName) + MessageAndFieldsSeparatorByteSize +
                Fields.Sum(x => x.GetByteSize() + FieldSeparatorByteSize);
     }
 

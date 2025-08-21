@@ -7,6 +7,8 @@ namespace Asv.ULog;
 /// </summary>
 public class ULogLoggedDataMessageToken : IULogDataToken, IEquatable<ULogLoggedDataMessageToken>
 {
+    private byte[] _data = [];
+
     #region Static
 
     public const string Name = "LoggedData";
@@ -29,7 +31,7 @@ public class ULogLoggedDataMessageToken : IULogDataToken, IEquatable<ULogLoggedD
     /// <summary>
     /// data contains the logged binary message as defined by Format Message
     /// </summary>
-    public byte[] Data { get; set; } = [];
+    public ArraySegment<byte> Data { get; set; }
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
@@ -45,7 +47,7 @@ public class ULogLoggedDataMessageToken : IULogDataToken, IEquatable<ULogLoggedD
 
     public int GetByteSize()
     {
-        return sizeof(ushort) /*msg_id*/ + Data.Length /*data*/;
+        return sizeof(ushort) /*msg_id*/ + Data.Count /*data*/;
     }
 
     public bool Equals(ULogLoggedDataMessageToken? other)
@@ -65,6 +67,6 @@ public class ULogLoggedDataMessageToken : IULogDataToken, IEquatable<ULogLoggedD
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(MessageId, Data);
+        return HashCode.Combine(MessageId, new ArraySegment<byte>());
     }
 }

@@ -31,7 +31,7 @@ public class ULogUnknownToken : IULogToken, IEquatable<ULogUnknownToken>
         {
             _unknownType = value;
             var buff = new char[1];
-            ULog.Encoding.GetChars(new ReadOnlySpan<byte>([_unknownType]), new Span<char>(buff));
+            ULogManager.Encoding.GetChars(new ReadOnlySpan<byte>([_unknownType]), new Span<char>(buff));
             UnknownTypeChar = buff[0];
         }
     }

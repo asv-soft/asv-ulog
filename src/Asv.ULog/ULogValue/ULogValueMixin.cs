@@ -37,7 +37,7 @@ public static class ULogValueMixin
         var message = messages[sub.MessageName];
         messageName = sub.MessageName;
         var obj = CreateReference(message.MessageName,messages);
-        var span = new ReadOnlySpan<byte>(data.Data);
+        var span = new ReadOnlySpan<byte>(data.Data.Array, data.Data.Offset, data.Data.Count);
         obj.Deserialize(ref span);
         return obj;
     }

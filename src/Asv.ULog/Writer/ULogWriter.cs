@@ -1,100 +1,204 @@
+using System.Buffers;
 using Asv.Common;
+using Asv.IO;
+using R3;
 
 namespace Asv.ULog;
 
-public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
+public class ULogWriter : AsyncDisposableOnce, IULogWriter, IULogWriter.IDefinitionSection, IULogWriter.IDataSection
 {
-    private ULogWriterState _logWriterState;
-    private readonly int? _writeSyncTokenEveryXToken;
-    private readonly IDisposable? _disposeIt;
-    private int _dataTokenCount;
-    private readonly object _lock = new();
+    private readonly IULogTokenWriter _writer;
+    private readonly IDisposable _disposeIt;
+    private readonly Lock _sync = new();
 
-    public ULogWriter(string sourceName, int? writeSyncTokenEveryXToken, IDisposable? disposeIt)
+    public ULogWriter(IULogTokenWriter writer, DateTime timestamp, bool leaveOpen = false)
     {
-        ArgumentNullException.ThrowIfNull(sourceName);
-        SourceName = sourceName;
-        _logWriterState = ULogWriterState.AppendHeader;
-        _writeSyncTokenEveryXToken = writeSyncTokenEveryXToken;
-        _disposeIt = disposeIt;
-    }
-
-    public string SourceName { get; }
-    
-    public IULogWriter AppendHeader(ULogFileHeaderToken header, ULogFlagBitsMessageToken flags)
-    {
-        if (_logWriterState != ULogWriterState.AppendHeader)
+        _writer = writer;
+        var builder = Disposable.CreateBuilder();
+        if (leaveOpen == false)
         {
-            throw new ULogWriterException($"ULog header already written. Current state: {_logWriterState:G}");
+            writer.AddTo(ref builder);
         }
-        InternalAppendHeader(header);
-        InternalAppend(flags);
-        _logWriterState = ULogWriterState.AppendDefinition;
-        return this;
+        
+        _disposeIt = builder.Build();
+        
+        var header = new ULogFileHeaderToken
+        {
+            Version = 1,
+            Timestamp = ULogManager.FromDateTimeToUnixMicroseconds(timestamp),
+        };
+        var flags = new ULogFlagBitsMessageToken
+        {
+            AppendedOffsets = [],
+            CompatFlags = [],
+            IncompatFlags = []
+        };
+        _writer.AppendHeader(header, flags);
+    }
+    
+
+    #region Simple types !!! READ ONLY !!!
+
+    private static readonly ULogTypeDefinition SimpleFloatType = new()
+    {
+        BaseType = ULogType.Float,
+        TypeName = ULogTypeDefinition.FloatTypeName,
+        ArraySize = 0,
+    };
+    private static readonly ULogTypeDefinition SimpleInt32Type = new()
+    {
+        BaseType = ULogType.Int32,
+        TypeName = ULogTypeDefinition.Int32TypeName,
+        ArraySize = 0,
+    };
+
+    #endregion
+    
+    #region 'Q': Default Parameter Message
+
+    
+    
+    private readonly ULogDefaultParameterMessageToken _cachedDefaultParamIntToken = new()
+    {
+        Key = new ULogTypeAndNameDefinition
+        {
+            Type = SimpleInt32Type
+        },
+    };
+    
+    public void DefineParameter(string name, int value, ULogParameterDefaultTypes type)
+    {
+        using(_sync.EnterScope())
+        {
+            _cachedDefaultParamIntToken.DefaultType = type;
+            _cachedDefaultParamIntToken.Key.Name = name;
+            _cachedDefaultParamIntToken.Value = value;
+            _writer.AppendDefinition(_cachedDefaultParamIntToken);
+        }
+    }
+    
+    private readonly ULogDefaultParameterMessageToken _cachedDefaultParamFloatToken = new()
+    {
+        Key = new ULogTypeAndNameDefinition
+        {
+            Type = SimpleFloatType
+        },
+    };
+
+    
+    public void DefineParameter(string name, float value, ULogParameterDefaultTypes type)
+    {
+        using(_sync.EnterScope())
+        {
+            _cachedDefaultParamFloatToken.DefaultType = type;
+            _cachedDefaultParamFloatToken.Key.Name = name;
+            _cachedDefaultParamFloatToken.Value = value;
+            _writer.AppendDefinition(_cachedDefaultParamFloatToken);
+        }
     }
 
-    public IULogWriter AppendDefinition(IULogDefinitionToken definitionToken)
+    public void DefineFormat(ULogFormatMessageToken token)
     {
-        switch (_logWriterState)
+        using(_sync.EnterScope())
         {
-            case ULogWriterState.AppendHeader:
-                throw new ULogWriterException($"Can't {nameof(AppendDefinition)}: you must {nameof(AppendHeader)} first. Current state: {_logWriterState}");
-            case > ULogWriterState.AppendDefinition:
-                throw new ULogException($"Can't {nameof(AppendDefinition)}: definition already written. You must {nameof(ULogWriterState.AppendDefinition)} before {_logWriterState:G}");
-            default:
-                if (definitionToken.TokenSection.HasFlag(UTokenPlaceFlags.Definition) == false)
+            _writer.AppendDefinition(token);
+        }
+    }
+
+    #endregion
+    
+    #region 'P': Parameter Message
+    
+    private readonly ULogParameterMessageToken _cachedParamIntToken = new()
+    {
+        Key = new ULogTypeAndNameDefinition
+        {
+            Type = SimpleInt32Type
+        },
+    };
+    
+
+    
+    public void WriteParameter(string name, int value)
+    {
+        using(_sync.EnterScope())
+        {
+            _cachedParamIntToken.Key.Name = name;
+            _cachedParamIntToken.Value = value;
+            _writer.AppendData(_cachedParamIntToken);
+        }
+    }
+    private readonly ULogParameterMessageToken _cachedParamFloatToken = new()
+    {
+        Key = new ULogTypeAndNameDefinition
+        {
+            Type = SimpleFloatType
+        },
+    };
+
+    private readonly Dictionary<SubscriptionKey,ushort> _subscriptions = new();
+
+    public void WriteParameter(string name, float value)
+    {
+        using(_sync.EnterScope())
+        {
+            _cachedParamFloatToken.Key.Name = name;
+            _cachedParamFloatToken.Value = value;
+            _writer.AppendData(_cachedParamFloatToken);
+        }
+    }
+
+    public void WriteSubscription(string messageName, byte multiId)
+    {
+        using (_sync.EnterScope())
+        {
+            var messageId = (ushort)_subscriptions.Count;
+            _subscriptions.Add(new SubscriptionKey(messageName, multiId), messageId);
+            _writer.AppendData(new ULogSubscriptionMessageToken
+            {
+                MultiId = multiId,
+                MessageId = messageId,
+                MessageName = messageName,
+            });
+        }
+    }
+
+    public void WriteData(string messageName, byte multiId, ISizedSpanSerializable data)
+    {
+        using (_sync.EnterScope())
+        {
+            var key = new SubscriptionKey(messageName, multiId);
+            if (!_subscriptions.TryGetValue(key, out var messageId))
+            {
+                throw new ULogException($"Subscription for message {messageName} not found");
+            }
+            var size = data.GetByteSize();
+            var buffer = ArrayPool<byte>.Shared.Rent(size);
+            try
+            {
+                data.Serialize(buffer,0, size);
+                _writer.AppendData(new ULogLoggedDataMessageToken
                 {
-                    throw new ULogException($"Can't {nameof(AppendDefinition)}: token {definitionToken.TokenType} is not a definition. You must use {nameof(ULogToken)} with {nameof(UTokenPlaceFlags.Definition)} flag.");
-                }
-                InternalAppend(definitionToken);
-                break;
+                    MessageId = messageId,
+                    Data = new ArraySegment<byte>(buffer,0, size)
+                });
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
         }
-
-        return this;
     }
 
-    public IULogWriter AppendData(IULogDataToken dataToken)
-    {
-        if (_logWriterState == ULogWriterState.AppendHeader)
-        {
-            throw new ULogWriterException($"Can't {nameof(AppendData)}: you must {nameof(AppendHeader)} and {nameof(AppendDefinition)} first. Current state: {_logWriterState}");
-        }
-        if (dataToken.TokenSection.HasFlag(UTokenPlaceFlags.Data) == false)
-        {
-            throw new ULogException($"Can't {nameof(AppendData)}: token {dataToken.TokenType} is not a definition. You must use {nameof(ULogToken)} with {nameof(UTokenPlaceFlags.Data)} flag.");
-        }
-        _logWriterState = ULogWriterState.AppendData;
-        InternalAppend(dataToken);
-        _dataTokenCount++;
-        if (_writeSyncTokenEveryXToken != null && _dataTokenCount % _writeSyncTokenEveryXToken == 0)
-        {
-            // Write sync token
-            InternalAppend(ULogSynchronizationMessageToken.Instance);
-        }
-        return this;
-    }
+    #endregion
 
-    public IULogWriter AppendParameter(string name, int value)
-    {
-        throw new NotImplementedException();
-    }
-
-    protected abstract void InternalAppendHeader(ULogFileHeaderToken header);
-    protected abstract void InternalAppend(IULogToken token);
-    
-    
-    private enum ULogWriterState
-    {
-        AppendHeader,
-        AppendDefinition,
-        AppendData,
-    }
+    #region Dispose
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            _disposeIt?.Dispose();
+            _disposeIt.Dispose();
         }
 
         base.Dispose(disposing);
@@ -104,9 +208,17 @@ public abstract class ULogWriter : AsyncDisposableOnce, IULogWriter
     {
         if (_disposeIt is IAsyncDisposable disposeItAsyncDisposable)
             await disposeItAsyncDisposable.DisposeAsync();
-        else if (_disposeIt != null)
+        else
             _disposeIt.Dispose();
 
         await base.DisposeAsyncCore();
     }
+
+    #endregion
+
+
+    public IULogWriter.IDefinitionSection Definition => this;
+    public IULogWriter.IDataSection Data => this;
 }
+
+public record SubscriptionKey(string MessageName, byte MultiId);

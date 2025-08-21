@@ -37,7 +37,7 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable, IEquata
     static ULogTypeAndNameDefinition()
     {
         var temp = TypeAndNameSeparator;
-        TypeAndNameSeparatorByteSize = ULog.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
+        TypeAndNameSeparatorByteSize = ULogManager.Encoding.GetByteCount(new ReadOnlySpan<char>(ref temp));
     }
 
     #endregion
@@ -56,7 +56,7 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable, IEquata
 
     public int GetByteSize()
     {
-        return ULog.Encoding.GetByteCount(Name) + TypeAndNameSeparatorByteSize + Type.GetByteSize();
+        return ULogManager.Encoding.GetByteCount(Name) + TypeAndNameSeparatorByteSize + Type.GetByteSize();
     }
 
     public void Deserialize(ref ReadOnlySpan<char> rawString)
@@ -74,12 +74,12 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable, IEquata
 
     public void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
-        var charSize = ULog.Encoding.GetCharCount(buffer);
+        var charSize = ULogManager.Encoding.GetCharCount(buffer);
         var charBuffer = ArrayPool<char>.Shared.Rent(charSize);
         try
         {
             var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
-            var cnt = ULog.Encoding.GetChars(buffer, charBuffer);
+            var cnt = ULogManager.Encoding.GetChars(buffer, charBuffer);
             Debug.Assert(cnt == charSize);
             Deserialize(ref rawString);
         }
@@ -94,9 +94,9 @@ public partial class ULogTypeAndNameDefinition : ISizedSpanSerializable, IEquata
         //we need to write e.g. type[array_length] field_name
         Type.Serialize(ref buffer);
         var temp = TypeAndNameSeparator;
-        var write = ULog.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
+        var write = ULogManager.Encoding.GetBytes(new ReadOnlySpan<char>(ref temp), buffer);
         buffer = buffer[write..];
-        Name.CopyTo(ref buffer, ULog.Encoding);
+        Name.CopyTo(ref buffer, ULogManager.Encoding);
     }
 
     public bool Equals(ULogTypeAndNameDefinition? other)

@@ -27,7 +27,7 @@ public class ULogChar : ULogSimple
     public override void Deserialize(ref ReadOnlySpan<byte> buffer)
     {
         Span<char> span = stackalloc char[1];
-        ULog.Encoding.GetChars(buffer[..1], span);
+        ULogManager.Encoding.GetChars(buffer[..1], span);
         _value = span[0];
         buffer = buffer[1..];
     }
@@ -36,7 +36,7 @@ public class ULogChar : ULogSimple
     {
         Span<char> span = stackalloc char[1];
         span[0] = _value;
-        ULog.Encoding.GetBytes(span, buffer);
+        ULogManager.Encoding.GetBytes(span, buffer);
         buffer = buffer[1..];
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

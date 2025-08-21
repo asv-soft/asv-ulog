@@ -55,7 +55,7 @@ public class ULogLoggedStringMessageToken : IULogDataToken, IEquatable<ULogLogge
         TimeStamp = BinSerialize.ReadULong(ref buffer);
 
         var messageBytes = buffer[..buffer.Length];
-        Message = ULog.Encoding.GetString(messageBytes);
+        Message = ULogManager.Encoding.GetString(messageBytes);
         buffer = buffer[Message.Length..];
     }
 
@@ -64,14 +64,14 @@ public class ULogLoggedStringMessageToken : IULogDataToken, IEquatable<ULogLogge
         ULogFormatMessageToken.CheckMessageName(Message);
         BinSerialize.WriteByte(ref buffer, (byte)LogLevel);
         BinSerialize.WriteULong(ref buffer, TimeStamp);
-        Message.CopyTo(ref buffer, ULog.Encoding);
+        Message.CopyTo(ref buffer, ULogManager.Encoding);
     }
 
     public int GetByteSize()
     {
         return sizeof(byte) /*LogLevel*/
                + sizeof(ulong) /*Timestamp*/
-               + ULog.Encoding.GetByteCount(Message);
+               + ULogManager.Encoding.GetByteCount(Message);
     }
 
     public enum ULogLevel
