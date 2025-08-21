@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using Asv.ULog;
 using Asv.ULog.Information;
-using Asv.Ulog.Tests;
+using Asv.ULog.Tests;
 using Xunit.Abstractions;
 
 namespace Asv.ULog.Tests;
@@ -22,7 +22,7 @@ public class ULogMultiInformationMessageTokenTests
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.CreateReader();
+        var reader = ULogManager.CreateReader();
         var result = reader.TryRead<ULogFileHeaderToken>(ref rdr, out var header);
         Assert.True(result);
         Assert.NotNull(header);
@@ -80,9 +80,9 @@ public class ULogMultiInformationMessageTokenTests
 
     private ReadOnlySpan<char> CharToString(byte[] value)
     {
-        var charSize = ULog.Encoding.GetCharCount(value);
+        var charSize = ULogManager.Encoding.GetCharCount(value);
         var charBuffer = new char[charSize];
-        ULog.Encoding.GetChars(value,charBuffer);
+        ULogManager.Encoding.GetChars(value,charBuffer);
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
 
@@ -100,7 +100,7 @@ public class ULogMultiInformationMessageTokenTests
         token.Deserialize(ref readOnlySpan);
         Assert.Equal(type, token.Key.Type.TypeName);
         Assert.Equal(name, token.Key.Name);
-        Assert.Equal(value, ULog.GetSimpleValue(token.Key.Type.BaseType, token.Value));
+        Assert.Equal(value, ULogManager.GetSimpleValue(token.Key.Type.BaseType, token.Value));
     }
 
     [Theory]
@@ -165,7 +165,7 @@ public class ULogMultiInformationMessageTokenTests
         var key = type + ULogTypeAndNameDefinition.TypeAndNameSeparator + name;
         var keyLength = (byte)key.Length;
 
-        var keyBytes = ULog.Encoding.GetBytes(key);
+        var keyBytes = ULogManager.Encoding.GetBytes(key);
 
         var valueBytes = value switch
         {
@@ -175,7 +175,7 @@ public class ULogMultiInformationMessageTokenTests
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        var buffer = new Span<byte>(new byte[1 + 1 + ULog.Encoding.GetByteCount(key) + valueBytes.Length])
+        var buffer = new Span<byte>(new byte[1 + 1 + ULogManager.Encoding.GetByteCount(key) + valueBytes.Length])
         {
             [0] = isContinued
         };
@@ -203,7 +203,7 @@ public class ULogMultiInformationMessageTokenTests
         var key = type + ULogTypeAndNameDefinition.TypeAndNameSeparator + name;
         var keyLength = kLength ?? (byte)key.Length;
 
-        var keyBytes = ULog.Encoding.GetBytes(key);
+        var keyBytes = ULogManager.Encoding.GetBytes(key);
 
         var valueBytes = value switch
         {
@@ -213,7 +213,7 @@ public class ULogMultiInformationMessageTokenTests
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
 
-        var buffer = new Span<byte>(new byte[1 + 1 + ULog.Encoding.GetByteCount(key) + valueBytes.Length])
+        var buffer = new Span<byte>(new byte[1 + 1 + ULogManager.Encoding.GetByteCount(key) + valueBytes.Length])
         {
             [0] = isContinued,
             [1] = keyLength

@@ -10,7 +10,7 @@ public class ULogFormatMessageTokenTests
     public void Deserialize_Success(string input, string expectedMessageName, string expectedFieldName, string expectedTypeName, int expectedArraySize)
     {
         // Arrange
-        var buffer = ULog.Encoding.GetBytes(input);
+        var buffer = ULogManager.Encoding.GetBytes(input);
         var readOnlySpan = new ReadOnlySpan<byte>(buffer);
         var token = new ULogFormatMessageToken();
 
@@ -31,7 +31,7 @@ public class ULogFormatMessageTokenTests
     public void Deserialize_InvalidFormat_ThrowsException(string input)
     {
         // Arrange
-        var buffer = ULog.Encoding.GetBytes(input);
+        var buffer = ULogManager.Encoding.GetBytes(input);
         var token = new ULogFormatMessageToken();
     
         // Делаем копию буфера, чтобы использовать внутри лямбды
@@ -75,7 +75,7 @@ public class ULogFormatMessageTokenTests
         // Act
         token.Serialize(ref span);
 
-        var serializedString = ULog.Encoding.GetString(buffer);
+        var serializedString = ULogManager.Encoding.GetString(buffer);
 
         // Assert
         Assert.Equal(expectedOutput, serializedString);

@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Asv.Ulog.Tests {
+namespace Asv.ULog.Tests {
     using System;
     
     

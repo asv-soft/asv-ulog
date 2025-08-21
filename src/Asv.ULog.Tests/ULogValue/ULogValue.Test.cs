@@ -15,7 +15,7 @@ public class ULogValueTest(ITestOutputHelper output)
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data);
-        var reader = ULog.CreateReader();
+        var reader = ULogManager.CreateReader();
         var format = new Dictionary<string, ULogFormatMessageToken>();
         var subscriptions = new Dictionary<ushort, ULogSubscriptionMessageToken>();
         var logged = new List<ULogLoggedDataMessageToken>();
@@ -58,7 +58,7 @@ public class ULogValueTest(ITestOutputHelper output)
         }
 
         var selectedItem = logged.Skip(3).First();
-        var value = ULog.Create(selectedItem, format, subscriptions, out var messageName);
+        var value = ULogManager.Create(selectedItem, format, subscriptions, out var messageName);
         foreach (var item in logged.Where(x=>x.MessageId == selectedItem.MessageId))
         {
             var span = new ReadOnlySpan<byte>(item.Data);

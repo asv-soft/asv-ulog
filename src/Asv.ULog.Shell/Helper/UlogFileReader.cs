@@ -50,7 +50,7 @@ public class UlogFileReader
             var sb = new StringBuilder();
             foreach (var v in param.Value)
             {
-                sb.Append(ULog.GetSimpleValue(v.Item1, v.Item2));
+                sb.Append(ULogManager.GetSimpleValue(v.Item1, v.Item2));
             }
             table.AddRow(new Markup($"[blue]{param.Key}[/]"), new Markup($"[red]{sb}[/]"));
         }
@@ -88,7 +88,7 @@ public class UlogFileReader
                 }
                 else
                 {
-                    sb.Append(ULog.GetSimpleValue(v.Item1, v.Item2));
+                    sb.Append(ULogManager.GetSimpleValue(v.Item1, v.Item2));
                 }
             }
             AnsiConsole.MarkupLine($"[blue]{param.Key}[/]: [red]{sb.ToString().Replace("[", "[[").Replace("]", "]]")}[/]");
@@ -138,9 +138,9 @@ public class UlogFileReader
     
     private ReadOnlySpan<char> CharToString(byte[] value)
     {
-        var charSize = ULog.Encoding.GetCharCount(value);
+        var charSize = ULogManager.Encoding.GetCharCount(value);
         var charBuffer = new char[charSize];
-        ULog.Encoding.GetChars(value,charBuffer);
+        ULogManager.Encoding.GetChars(value,charBuffer);
         var rawString = new ReadOnlySpan<char>(charBuffer, 0, charSize);
         return rawString.ToString();
     }
@@ -148,7 +148,7 @@ public class UlogFileReader
     private List<IULogToken> ReadTokens(string filePath, Func<IULogToken, bool> filter)
     {
         var rdr = CreateSequenceReader(filePath);
-        var reader = ULog.CreateReader();
+        var reader = ULogManager.CreateReader();
         var tokens = new List<IULogToken>();
 
         while (reader.TryRead(ref rdr, out var token))

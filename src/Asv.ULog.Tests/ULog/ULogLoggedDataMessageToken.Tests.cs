@@ -1,6 +1,6 @@
 using System.Buffers;
 using Asv.ULog;
-using Asv.Ulog.Tests;
+using Asv.ULog.Tests;
 using Xunit.Abstractions;
 
 namespace Asv.ULog.Tests;
@@ -19,7 +19,7 @@ public class ULogLoggedDataMessageTokenTests
     {
         var data = new ReadOnlySequence<byte>(TestData.ulog_sample);
         var rdr = new SequenceReader<byte>(data); 
-        var reader = ULog.CreateReader();
+        var reader = ULogManager.CreateReader();
 
         var counter = 0;
         while (reader.TryRead(ref rdr, out var token))

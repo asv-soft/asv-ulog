@@ -2,7 +2,7 @@ using System.IO.Compression;
 using Asv.ULog;
 using JetBrains.Annotations;
 
-namespace Asv.Ulog.Tests;
+namespace Asv.ULog.Tests;
 
 [TestSubject(typeof(ULogWriter))]
 public class ULogWriterTest
@@ -26,7 +26,7 @@ public class ULogWriterTest
 
             using var zip = new GZipStream(File.Create(path), CompressionLevel.SmallestSize);
             
-            using var writer = ULog.ULog.CreateWriter(zip,path);
+            using var writer = ULogManager.CreateWriter(zip,path);
             writer.AppendHeader(DateTime.Now);
             writer.AppendData(new ULogSubscriptionMessageToken
             {

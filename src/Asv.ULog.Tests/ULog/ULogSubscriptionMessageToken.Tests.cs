@@ -142,7 +142,7 @@ public class ULogSubscriptionMessageTokenTests
         }
 
         var messageIdBytes = BitConverter.GetBytes(messageId);
-        var messageNameBytes = ULog.Encoding.GetBytes(messageName);
+        var messageNameBytes = ULogManager.Encoding.GetBytes(messageName);
         var buffer = new Span<byte>(new byte[1 + 2 + messageNameBytes.Length]);
 
         buffer[0] = multiId;
